@@ -28,12 +28,12 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }: SidebarProps) => {
   ];
 
   return (
-    <div className="bg-white w-64 min-h-screen shadow-sm border-r">
-      <div className="p-4">
+    <div className="bg-white w-64 h-screen shadow-sm border-r flex flex-col">
+      <div className="p-4 border-b">
         <h2 className="text-xl font-bold text-gray-800">Painel Admin</h2>
       </div>
       
-      <nav className="mt-8">
+      <nav className="flex-1 py-4">
         {menuItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -46,14 +46,14 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }: SidebarProps) => {
                   : "text-gray-600"
               }`}
             >
-              <Icon className="w-5 h-5 mr-3" />
-              {item.label}
+              <Icon className="w-5 h-5 mr-3 flex-shrink-0" />
+              <span className="truncate">{item.label}</span>
             </button>
           );
         })}
       </nav>
 
-      <div className="absolute bottom-4 left-4 right-4">
+      <div className="p-4 border-t mt-auto">
         <Button
           variant="outline"
           className="w-full"

@@ -57,7 +57,7 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4 items-center">
+      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
@@ -67,7 +67,7 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
             className="pl-10"
           />
         </div>
-        <Button onClick={onAddClient}>
+        <Button onClick={onAddClient} className="w-full sm:w-auto">
           <UserPlus className="w-4 h-4 mr-2" />
           Adicionar Cliente
         </Button>
@@ -76,24 +76,24 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
       <div className="grid gap-4">
         {filteredClients.map((client) => (
           <Card key={client.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg">{client.name}</CardTitle>
-                  <p className="text-sm text-gray-600">{client.email}</p>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-lg truncate">{client.name}</CardTitle>
+                  <p className="text-sm text-gray-600 truncate">{client.email}</p>
                   <p className="text-sm text-gray-600">{client.phone}</p>
                 </div>
-                <Badge variant={client.status === "ativo" ? "default" : "secondary"}>
+                <Badge variant={client.status === "ativo" ? "default" : "secondary"} className="self-start">
                   {client.status}
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
+            <CardContent className="pt-0">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <p className="text-sm text-gray-600">
                   Último agendamento: {new Date(client.lastAppointment).toLocaleDateString('pt-BR')}
                 </p>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto">
                   Ver Detalhes
                 </Button>
               </div>

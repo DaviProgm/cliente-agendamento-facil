@@ -72,7 +72,7 @@ const AppointmentList = ({ onAddAppointment }: AppointmentListProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4 items-center">
+      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
@@ -82,7 +82,7 @@ const AppointmentList = ({ onAddAppointment }: AppointmentListProps) => {
             className="pl-10"
           />
         </div>
-        <Button onClick={onAddAppointment}>
+        <Button onClick={onAddAppointment} className="w-full sm:w-auto">
           <Calendar className="w-4 h-4 mr-2" />
           Novo Agendamento
         </Button>
@@ -91,19 +91,19 @@ const AppointmentList = ({ onAddAppointment }: AppointmentListProps) => {
       <div className="grid gap-4">
         {filteredAppointments.map((appointment) => (
           <Card key={appointment.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg">{appointment.clientName}</CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-lg truncate">{appointment.clientName}</CardTitle>
                   <p className="text-sm text-gray-600">{appointment.service}</p>
                 </div>
-                <Badge variant={getStatusColor(appointment.status)}>
+                <Badge variant={getStatusColor(appointment.status)} className="self-start">
                   {appointment.status}
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
+            <CardContent className="pt-0">
+              <div className="flex flex-col gap-3">
                 <div>
                   <p className="text-sm text-gray-600">
                     {new Date(appointment.date).toLocaleDateString('pt-BR')} às {appointment.time}
@@ -112,12 +112,12 @@ const AppointmentList = ({ onAddAppointment }: AppointmentListProps) => {
                     <p className="text-sm text-gray-500 mt-1">{appointment.notes}</p>
                   )}
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button variant="outline" size="sm" className="w-full sm:w-auto">
                     Editar
                   </Button>
                   {appointment.status === "agendado" && (
-                    <Button size="sm">
+                    <Button size="sm" className="w-full sm:w-auto">
                       Concluir
                     </Button>
                   )}

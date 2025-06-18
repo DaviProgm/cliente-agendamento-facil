@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Users, UserPlus } from "lucide-react";
+import { Calendar, Users, UserPlus, Menu } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import ClientList from "@/components/ClientList";
 import AppointmentList from "@/components/AppointmentList";
@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -87,27 +88,84 @@ const Dashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+      {/* Sidebar Desktop */}
+      <div className="hidden lg:block">
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+      </div>
+
+      {/* Sidebar Mobile Overlay */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setIsSidebarOpen(false)} />
+          <div className="relative">
+            <Sidebar 
+              activeTab={activeTab} 
+              setActiveTab={(tab) => {
+                setActiveTab(tab);
+                setIsSidebarOpen(false);
+              }} 
+              onLogout={handleLogout} 
+            />
+          </div>
+        </div>
+      )}
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm border-b p-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              {activeTab === "overview" && "Visão Geral"}
-              {activeTab === "clients" && "Clientes"}
-              {activeTab === "appointments" && "Agendamentos"}
-            </h1>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="lg:hidden"
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <Menu className="w-4 h-4" />
+              </Button>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                {activeTab === "overview" && "Visão Geral"}
+                {activeTab === "clients" && "Clientes"}
+                {activeTab === "appointments" && "Agendamentos"}
+              </h1>
+            </div>
             <div className="flex gap-2">
               {activeTab === "clients" && (
-                <Button onClick={() => setIsClientModalOpen(true)}>
+                <Button 
+                  onClick={() => setIsClientModalOpen(true)}
+                  size="sm"
+                  className="hidden sm:flex"
+                >
                   <UserPlus className="w-4 h-4 mr-2" />
                   Adicionar Cliente
                 </Button>
               )}
               {activeTab === "appointments" && (
-                <Button onClick={() => setIsAppointmentModalOpen(true)}>
+                <Button 
+                  onClick={() => setIsAppointmentModalOpen(true)}
+                  size="sm"
+                  className="hidden sm:flex"
+                >
                   <Calendar className="w-4 h-4 mr-2" />
                   Novo Agendamento
+                </Button>
+              )}
+              {/* Mobile action buttons */}
+              {activeTab === "clients" && (
+                <Button 
+                  onClick={() => setIsClientModalOpen(true)}
+                  size="sm"
+                  className="sm:hidden"
+                >
+                  <UserPlus className="w-4 h-4" />
+                </Button>
+              )}
+              {activeTab === "appointments" && (
+                <Button 
+                  onClick={() => setIsAppointmentModalOpen(true)}
+                  size="sm"
+                  className="sm:hidden"
+                >
+                  <Calendar className="w-4 h-4" />
                 </Button>
               )}
             </div>
