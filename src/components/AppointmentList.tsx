@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
 
 interface Appointment {
   id: number;
@@ -24,7 +25,7 @@ const AppointmentList = ({ onAddAppointment }: AppointmentListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   
   // Dados mock - substituir pela integração com backend
-  const [appointments] = useState<Appointment[]>([
+  const [appointments, setAppointments] = useState<Appointment[]>([
     {
       id: 1,
       clientName: "João Silva",
@@ -68,6 +69,26 @@ const AppointmentList = ({ onAddAppointment }: AppointmentListProps) => {
       default:
         return "default";
     }
+  };
+
+  const handleCompleteAppointment = (appointmentId: number) => {
+    setAppointments(prev => 
+      prev.map(appointment => 
+        appointment.id === appointmentId 
+          ? { ...appointment, status: "concluído" as const }
+          : appointment
+      )
+    );
+
+    const appointment = appointments.find(app => app.id === appointmentId);
+    
+    toast({
+      title: "Agendamento concluído!",
+      description: `O agendamento de ${appointment?.clientName} foi marcado como concluído.`,
+    });
+
+    // Aqui você fará a integração com o backend
+    console.log("Concluir agendamento ID:", appointmentId);
   };
 
   return (
@@ -117,7 +138,11 @@ const AppointmentList = ({ onAddAppointment }: AppointmentListProps) => {
                     Editar
                   </Button>
                   {appointment.status === "agendado" && (
-                    <Button size="sm" className="w-full sm:w-auto">
+                    <Button 
+                      size="sm" 
+                      className="w-full sm:w-auto"
+                      onClick={() => handleCompleteAppointment(appointment.id)}
+                    >
                       Concluir
                     </Button>
                   )}
