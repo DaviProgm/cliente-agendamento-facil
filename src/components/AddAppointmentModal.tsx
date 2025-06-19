@@ -7,7 +7,7 @@ type AddAppointmentModalProps = {
   onClose: () => void;
 };
 
-const AddAppointmentModal = ({ isOpen, onClose }: AddAppointmentModalProps) => {
+const EditAppointmentModal = ({ isOpen, onClose }: AddAppointmentModalProps) => {
   const [formData, setFormData] = useState({
     clientName: "",
     service: "",
@@ -133,4 +133,4 @@ const AddAppointmentModal = ({ isOpen, onClose }: AddAppointmentModalProps) => {
   );
 };
 
-export default AddAppointmentModal;
+export default EditAppointmentModal;
