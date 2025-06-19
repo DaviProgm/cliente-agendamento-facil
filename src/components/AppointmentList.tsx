@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import EditAppointmentModal from "./AddAppointmentModal"; 
+import EditAppointmentModal from "@/components/AddAppointmentModal"; 
 
 const AppointmentList = ({ onAddAppointment }) => {
   const [searchTerm, setSearchTerm] = useState("");
