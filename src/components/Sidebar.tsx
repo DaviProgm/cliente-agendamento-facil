@@ -30,7 +30,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }: SidebarProps) => {
   return (
     <div className="bg-white w-64 h-screen shadow-sm border-r flex flex-col">
       <div className="p-4 border-b">
-        <h2 className="text-xl font-bold text-gray-800">Painel Admin</h2>
+        <h2 className="text-xl font-bold text-gray-800">AgendaPro </h2>
       </div>
       
       <nav className="flex-1 py-4">

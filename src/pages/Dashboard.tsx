@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Users, UserPlus, Menu } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import ClientList from "@/components/ClientList";
@@ -15,18 +15,66 @@ const Dashboard = () => {
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [agendamentosHoje, setAgendamentosHoje] = useState(0);
+  const [agendamentosMes, setAgendamentosMes] = useState(0);
+  const [totalClientes, setTotalClientes] = useState(0); // opcional se tiver clientes
   const navigate = useNavigate();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    if (!isAuthenticated) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       navigate("/login");
     }
   }, [navigate]);
 
+  useEffect(() => {
+    async function fetchAgendamentos() {
+      try {
+        const response = await axios.get("http://localhost:4005/agendamentos");
+        const agendamentos = response.data;
+
+        const hoje = new Date();
+        const hojeStr = hoje.toISOString().split("T")[0]; // 'YYYY-MM-DD'
+        const mesAtual = hoje.getMonth(); // 0-indexed (0 = jan)
+        const anoAtual = hoje.getFullYear();
+
+        // Contar agendamentos de hoje
+        const countHoje = agendamentos.filter(
+          (ag: any) => ag.date === hojeStr
+        ).length;
+
+        // Contar agendamentos do mês atual
+        const countMes = agendamentos.filter((ag: any) => {
+          const dataAg = new Date(ag.date);
+          return (
+            dataAg.getMonth() === mesAtual && dataAg.getFullYear() === anoAtual
+          );
+        }).length;
+
+        setAgendamentosHoje(countHoje);
+        setAgendamentosMes(countMes);
+
+      } catch (error) {
+        console.error("Erro ao buscar agendamentos:", error);
+      }
+    }
+
+    // Você pode fazer um fetch para clientes se tiver a rota e quiser contar totalClientes
+    // async function fetchClientes() {
+    //   try {
+    //     const response = await axios.get("http://localhost:4005/clientes");
+    //     setTotalClientes(response.data.length);
+    //   } catch {}
+    // }
+    // fetchClientes();
+
+    fetchAgendamentos();
+  }, []);
+
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
+    localStorage.removeItem("isAuthenticated");
     navigate("/login");
   };
 
@@ -35,47 +83,43 @@ const Dashboard = () => {
       case "clients":
         return <ClientList onAddClient={() => setIsClientModalOpen(true)} />;
       case "appointments":
-        return <AppointmentList onAddAppointment={() => setIsAppointmentModalOpen(true)} />;
+        return (
+          <AppointmentList
+            onAddAppointment={() => setIsAppointmentModalOpen(true)}
+          />
+        );
       default:
         return (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total de Clientes
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">25</div>
-                <p className="text-xs text-muted-foreground">
-                  +2 novos este mês
-                </p>
+                <div className="text-2xl font-bold">{totalClientes || 25}</div>
+                <p className="text-xs text-muted-foreground">+2 novos este mês</p>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Agendamentos Hoje
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Agendamentos Hoje</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">8</div>
-                <p className="text-xs text-muted-foreground">
-                  3 pendentes
-                </p>
+                <div className="text-2xl font-bold">{agendamentosHoje}</div>
+                <p className="text-xs text-muted-foreground">pendentes</p>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Agendamentos Mês
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Agendamentos Mês</CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">124</div>
+                <div className="text-2xl font-bold">{agendamentosMes}</div>
                 <p className="text-xs text-muted-foreground">
                   +12% em relação ao mês anterior
                 </p>
@@ -90,26 +134,33 @@ const Dashboard = () => {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar Desktop */}
       <div className="hidden lg:block">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onLogout={handleLogout}
+        />
       </div>
 
       {/* Sidebar Mobile Overlay */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setIsSidebarOpen(false)} />
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setIsSidebarOpen(false)}
+          />
           <div className="relative">
-            <Sidebar 
-              activeTab={activeTab} 
+            <Sidebar
+              activeTab={activeTab}
               setActiveTab={(tab) => {
                 setActiveTab(tab);
                 setIsSidebarOpen(false);
-              }} 
-              onLogout={handleLogout} 
+              }}
+              onLogout={handleLogout}
             />
           </div>
         </div>
       )}
-      
+
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm border-b p-4">
           <div className="flex justify-between items-center">
@@ -130,7 +181,7 @@ const Dashboard = () => {
             </div>
             <div className="flex gap-2">
               {activeTab === "clients" && (
-                <Button 
+                <Button
                   onClick={() => setIsClientModalOpen(true)}
                   size="sm"
                   className="hidden sm:flex"
@@ -140,7 +191,7 @@ const Dashboard = () => {
                 </Button>
               )}
               {activeTab === "appointments" && (
-                <Button 
+                <Button
                   onClick={() => setIsAppointmentModalOpen(true)}
                   size="sm"
                   className="hidden sm:flex"
@@ -151,7 +202,7 @@ const Dashboard = () => {
               )}
               {/* Mobile action buttons */}
               {activeTab === "clients" && (
-                <Button 
+                <Button
                   onClick={() => setIsClientModalOpen(true)}
                   size="sm"
                   className="sm:hidden"
@@ -160,7 +211,7 @@ const Dashboard = () => {
                 </Button>
               )}
               {activeTab === "appointments" && (
-                <Button 
+                <Button
                   onClick={() => setIsAppointmentModalOpen(true)}
                   size="sm"
                   className="sm:hidden"
@@ -177,13 +228,13 @@ const Dashboard = () => {
         </main>
       </div>
 
-      <AddClientModal 
-        isOpen={isClientModalOpen} 
-        onClose={() => setIsClientModalOpen(false)} 
+      <AddClientModal
+        isOpen={isClientModalOpen}
+        onClose={() => setIsClientModalOpen(false)}
       />
-      <AddAppointmentModal 
-        isOpen={isAppointmentModalOpen} 
-        onClose={() => setIsAppointmentModalOpen(false)} 
+      <AddAppointmentModal
+        isOpen={isAppointmentModalOpen}
+        onClose={() => setIsAppointmentModalOpen(false)}
       />
     </div>
   );

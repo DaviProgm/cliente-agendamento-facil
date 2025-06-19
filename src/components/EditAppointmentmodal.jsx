@@ -2,12 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../instance/api.js";
 import { toast } from "sonner";
 
-type AddAppointmentModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-};
-
-const AddAppointmentModal = ({ isOpen, onClose }: AddAppointmentModalProps) => {
+const EditAppointmentModal = ({ isOpen, onClose, appointment, onUpdated }) => {
   const [formData, setFormData] = useState({
     clientName: "",
     service: "",
@@ -18,35 +13,35 @@ const AddAppointmentModal = ({ isOpen, onClose }: AddAppointmentModalProps) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Quando o modal abrir ou o appointment mudar, atualiza o formData
   useEffect(() => {
-    if (isOpen) {
+    if (appointment) {
       setFormData({
-        clientName: "",
-        service: "",
-        date: "",
-        time: "",
-        notes: "",
+        clientName: appointment.name || "",
+        service: appointment.service || "",
+        date: appointment.date || "",
+        time: appointment.time || "",
+        notes: appointment.observations || "",
       });
     }
-  }, [isOpen]);
+  }, [appointment]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await api.post("/agendamentos", {
+      await api.put(`/agendamentos/${appointment.id}`, {
         name: formData.clientName,
         service: formData.service,
         date: formData.date,
         time: formData.time,
         observations: formData.notes,
       });
-
-      toast.success("Agendamento criado com sucesso!");
-      onClose(); 
-    } catch (error: any) {
-      console.error("Erro ao criar agendamento:", error.response?.data || error.message);
-      toast.error("Erro ao criar agendamento. Verifique os dados e tente novamente.");
+      toast.success("Agendamento atualizado com sucesso!");
+      onUpdated();
+    } catch (error) {
+      console.error("Erro ao atualizar agendamento:", error.response?.data || error.message);
+      toast.error("Erro ao atualizar agendamento.");
     } finally {
       setIsSubmitting(false);
     }
@@ -57,16 +52,13 @@ const AddAppointmentModal = ({ isOpen, onClose }: AddAppointmentModalProps) => {
   return (
     <div className="modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="modal-content bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Novo Agendamento</h2>
-          <button
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="text-sm text-red-500"
-          >
-            Fechar
-          </button>
-        </div>
+        <button
+          onClick={onClose}
+          disabled={isSubmitting}
+          className="text-sm text-red-500 mb-4"
+        >
+          Fechar
+        </button>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -125,7 +117,7 @@ const AddAppointmentModal = ({ isOpen, onClose }: AddAppointmentModalProps) => {
             disabled={isSubmitting}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
           >
-            {isSubmitting ? "Salvando..." : "Salvar Agendamento"}
+            {isSubmitting ? "Atualizando..." : "Atualizar Agendamento"}
           </button>
         </form>
       </div>
@@ -133,4 +125,4 @@ const AddAppointmentModal = ({ isOpen, onClose }: AddAppointmentModalProps) => {
   );
 };
 
-export default AddAppointmentModal;
+export default EditAppointmentModal;

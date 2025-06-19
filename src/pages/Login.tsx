@@ -1,10 +1,16 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
@@ -13,29 +19,51 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (!email || !password) {
+      toast({
+        title: "Erro no login",
+        description: "Por favor, preencha todos os campos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
-    // Simular login - aqui você integrará com seu backend
-    setTimeout(() => {
-      if (email && password) {
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("userEmail", email);
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo ao painel administrativo.",
-        });
+    try {
+      const response = await axios.post("http://localhost:4005/auth/login", {
+        email,
+        password,
+      });
+
+      const { token, user } = response.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("userEmail", user.email);
+
+      toast({
+        title: "Login realizado com sucesso!",
+        description: `Bem-vindo, ${user.email}!`,
+      });
+
+      setTimeout(() => {
         navigate("/dashboard");
-      } else {
-        toast({
-          title: "Erro no login",
-          description: "Por favor, preencha todos os campos.",
-          variant: "destructive",
-        });
-      }
+      }, 100);
+    } catch (error) {
+      console.error("Erro no login:", error);
+      toast({
+        title: "Falha na autenticação",
+        description:
+          error.response?.data?.message ||
+          "Email ou senha inválidos. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
