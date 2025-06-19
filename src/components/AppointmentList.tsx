@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import EditAppointmentModal from "./EditAppointmentModal"; 
+import EditAppointmentModal from "./AddAppointmentModal"; 
 
 const AppointmentList = ({ onAddAppointment }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -159,8 +159,6 @@ const AppointmentList = ({ onAddAppointment }) => {
        <EditAppointmentModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        appointment={selectedAppointment}
-        onUpdated={handleUpdated}
       />
     </>
   );
