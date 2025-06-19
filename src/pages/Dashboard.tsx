@@ -30,7 +30,7 @@ const Dashboard = () => {
   useEffect(() => {
     async function fetchAgendamentos() {
       try {
-        const response = await axios.get("http://localhost:4005/agendamentos");
+        const response = await axios.get("https://schedule-control-api.onrender.com/agendamentos");
         const agendamentos = response.data;
 
         const hoje = new Date();
@@ -62,7 +62,7 @@ const Dashboard = () => {
     // Você pode fazer um fetch para clientes se tiver a rota e quiser contar totalClientes
     // async function fetchClientes() {
     //   try {
-    //     const response = await axios.get("http://localhost:4005/clientes");
+    //     const response = await axios.get("https://schedule-control-api.onrender.com/clientes");
     //     setTotalClientes(response.data.length);
     //   } catch {}
     // }
@@ -200,7 +200,6 @@ const Dashboard = () => {
                   Novo Agendamento
                 </Button>
               )}
-              {/* Mobile action buttons */}
               {activeTab === "clients" && (
                 <Button
                   onClick={() => setIsClientModalOpen(true)}

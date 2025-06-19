@@ -34,7 +34,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:4005/auth/login", {
+      const response = await axios.post("https://schedule-control-api.onrender.com/auth/login", {
         email,
         password,
       });

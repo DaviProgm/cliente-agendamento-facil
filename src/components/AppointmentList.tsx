@@ -16,7 +16,7 @@ const AppointmentList = ({ onAddAppointment }) => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   useEffect(() => {
-    axios.get("http://localhost:4005/agendamentos")
+    axios.get("https://schedule-control-api.onrender.com/agendamentos")
       .then(res => {
         const dataWithStatus = res.data.map(item => ({
           ...item,
@@ -77,7 +77,7 @@ const AppointmentList = ({ onAddAppointment }) => {
   const handleUpdated = () => {
     setIsEditModalOpen(false);
     setSelectedAppointment(null);
-    axios.get("http://localhost:4005/agendamentos")
+    axios.get("https://schedule-control-api.onrender.com/agendamentos")
       .then(res => {
         const dataWithStatus = res.data.map(item => ({
           ...item,
