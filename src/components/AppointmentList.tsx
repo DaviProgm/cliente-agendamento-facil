@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../instance/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,64 +20,38 @@ const AppointmentList = ({ onAddAppointment }) => {
 
   const fetchAppointments = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token"); // ou de onde você guarda o token
 
-      if (!token) {
+      const res = await api.get("/agendamentos");
+
+
+      if (!Array.isArray(res.data)) {
         toast({
-          title: "Acesso não autorizado",
-          description: "Faça login para visualizar seus agendamentos.",
+          title: "Erro",
+          description: "Resposta inválida da API.",
           variant: "destructive",
         });
         return;
       }
 
-      const res = await axios.get("https://schedule-control-api.onrender.com/agendamentos", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!Array.isArray(res.data)) {
-        throw new Error("Resposta inesperada da API");
-      }
-
       const dataWithStatus = res.data.map((item) => ({
         ...item,
-        status: item.status || "agendado",
+        status: "agendado",
       }));
-
       setAppointments(dataWithStatus);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          toast({
-            title: "Sessão expirada",
-            description: "Sua sessão expirou. Faça login novamente.",
-            variant: "destructive",
-          });
-          // Ex: redirecionar:
-          // window.location.href = "/login";
-        } else {
-          toast({
-            title: "Erro ao buscar agendamentos",
-            description: error.response?.data?.message || "Erro inesperado no servidor.",
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Erro inesperado",
-          description: error?.message || "Erro desconhecido.",
-          variant: "destructive",
-        });
-      }
       console.error("Erro ao buscar agendamentos:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os agendamentos. Verifique autenticação.",
+        variant: "destructive",
+      });
     }
   };
 
   const filteredAppointments = appointments.filter((appointment) =>
-    appointment.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.service?.toLowerCase().includes(searchTerm.toLowerCase())
+  (appointment.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    appointment.service?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const getStatusColor = (status) => {
@@ -118,7 +92,7 @@ const AppointmentList = ({ onAddAppointment }) => {
   const handleUpdated = () => {
     setIsEditModalOpen(false);
     setSelectedAppointment(null);
-    fetchAppointments(); // Atualiza após edição
+    fetchAppointments(); // recarregar lista após edição
   };
 
   return (
