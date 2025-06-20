@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import api from "../instance/api.js";
+import api from "../instance/api";
 import { toast } from "sonner";
 
 const EditAppointmentModal = ({
@@ -20,15 +20,16 @@ const EditAppointmentModal = ({
 
   useEffect(() => {
     if (appointment) {
+      const { name, service, date, time, observations } = appointment;
+
       setFormData({
-        name: appointment.name || "",
-        service: appointment.service || "",
-        date: appointment.date || "",
-        time: appointment.time || "",
-        observations: appointment.observations || "",
+        name: name || "",
+        service: service || "",
+        date: date?.split("T")[0] || "", // força formato YYYY-MM-DD
+        time: time || "",
+        observations: observations || "",
       });
     } else {
-      // Limpa o formulário ao fechar ou zerar appointment
       setFormData({
         name: "",
         service: "",
@@ -48,8 +49,18 @@ const EditAppointmentModal = ({
     }
 
     setIsSubmitting(true);
+
+    const payload = {
+      name: formData.name.trim(),
+      service: formData.service.trim(),
+      date: formData.date,
+      time: formData.time,
+      observations: formData.observations.trim(),
+    };
+
     try {
-      await api.put(`/agendamentos/${appointment.id}`, formData);
+      console.log("Atualizando agendamento ID:", appointment.id, payload);
+      await api.put(`/agendamentos/${appointment.id}`, payload);
 
       toast.success("Agendamento atualizado com sucesso!");
       if (typeof onUpdated === "function") onUpdated();

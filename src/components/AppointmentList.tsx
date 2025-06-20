@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "../instance/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,20 +8,20 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import EditAppointmentModal from "./EditAppointmentmodal";
 
-// Definindo tipos básicos para agendamento (ajuste conforme seu modelo real)
+// Tipos
 interface Appointment {
   id: number;
   name: string;
   service: string;
-  date: string; // ISO string
+  date: string;
   time: string;
   observations?: string;
-  status?: string;
+  status?: "agendado" | "concluído" | "cancelado" | string;
 }
 
 interface AppointmentListProps {
   onAddAppointment: () => void;
-  refreshFlag: boolean; // Novo prop que vem do pai
+  refreshFlag: boolean;
 }
 
 const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, refreshFlag }) => {
@@ -30,18 +30,16 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
-  // Sempre que refreshFlag mudar, busca a lista de agendamentos
-  useEffect(() => {
-    fetchAppointments();
-  }, [refreshFlag]);
+  // Função para formatar data YYYY-MM-DD para DD/MM/YYYY
+  const formatDateToBR = (dateString: string) => {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split("-");
+    return `${day}/${month}/${year}`;
+  };
 
-  // Você pode manter ou retirar o useEffect sem dependências, 
-  // mas assim garante atualização na montagem e no refreshFlag
-
-  const fetchAppointments = async () => {
+  // ✅ Requisição otimizada com useCallback
+  const fetchAppointments = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token");
-
       const res = await api.get("/agendamentos");
 
       if (!Array.isArray(res.data)) {
@@ -63,19 +61,26 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
       console.error("Erro ao buscar agendamentos:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar os agendamentos. Verifique autenticação.",
+        description: "Não foi possível carregar os agendamentos. Verifique a autenticação.",
         variant: "destructive",
       });
     }
-  };
+  }, []);
 
+  // Atualiza ao montar ou quando refreshFlag muda
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments, refreshFlag]);
+
+  // ✅ Busca com case insensitive
   const filteredAppointments = appointments.filter(
     (appointment) =>
       appointment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       appointment.service.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusColor = (status?: string) => {
+  // ✅ Badge status com cor adequada
+  const getStatusColor = (status: string = "agendado") => {
     switch (status) {
       case "agendado":
         return "default";
@@ -88,6 +93,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
     }
   };
 
+  // ✅ Concluir agendamento (simulado no frontend)
   const handleCompleteAppointment = (appointmentId: number) => {
     setAppointments((prev) =>
       prev.map((appointment) =>
@@ -96,11 +102,13 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
     );
 
     const appointment = appointments.find((app) => app.id === appointmentId);
-
     toast({
       title: "Agendamento concluído!",
       description: `O agendamento de ${appointment?.name} foi marcado como concluído.`,
     });
+
+    // Aqui você pode fazer chamada PUT real para atualizar backend, se desejar
+    // await api.put(`/agendamentos/${appointmentId}`, { ...appointment, status: 'concluído' });
   };
 
   const handleEditClick = (appointment: Appointment) => {
@@ -146,7 +154,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
                     variant={getStatusColor(appointment.status)}
                     className="self-start"
                   >
-                    {appointment.status ?? "agendado"}
+                    {appointment.status}
                   </Badge>
                 </div>
               </CardHeader>
@@ -154,7 +162,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
                 <div className="flex flex-col gap-3">
                   <div>
                     <p className="text-sm text-gray-600">
-                      {new Date(appointment.date).toLocaleDateString("pt-BR")} às {appointment.time}
+                      {formatDateToBR(appointment.date)} às {appointment.time}
                     </p>
                     {appointment.observations && (
                       <p className="text-sm text-gray-500 mt-1">{appointment.observations}</p>
@@ -197,3 +205,4 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
 };
 
 export default AppointmentList;
+  
