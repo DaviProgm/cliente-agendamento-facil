@@ -1,73 +1,115 @@
-# Welcome to your Lovable project
+#  AgendaPro — Sistema de Agendamento e Controle de Clientes
 
-## Project info
+![React](https://img.shields.io/badge/React-18-blue?logo=react)
+![Node.js](https://img.shields.io/badge/Node.js-18-green?logo=node.js)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?logo=postgresql)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
 
-**URL**: https://lovable.dev/projects/5e96c0f7-41c8-4c2c-86b7-5fe12ae9430d
+**Agenda Pro** é uma aplicação completa de gerenciamento de agendamentos com controle de clientes, horários e serviços. Conta com painel de controle moderno, login seguro via JWT, e integração full stack com API REST. Ideal para clínicas, salões, estúdios ou qualquer serviço que utilize agendamento com clientes.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## ⚙️ Tecnologias Utilizadas
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/5e96c0f7-41c8-4c2c-86b7-5fe12ae9430d) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
+### 🔹 Frontend
+- React 18 + Vite
 - TypeScript
-- React
-- shadcn-ui
 - Tailwind CSS
+- Axios (com interceptor de JWT)
+- Toast/sonner para feedbacks
+- Deploy: [Vercel](https://cliente-agendamento-facil.vercel.app)
 
-## How can I deploy this project?
+### 🔸 Backend
+- Node.js + Express
+- Sequelize ORM + PostgreSQL
+- JWT para autenticação
+- Dotenv
+- Deploy: [Render]
 
-Simply open [Lovable](https://lovable.dev/projects/5e96c0f7-41c8-4c2c-86b7-5fe12ae9430d) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## 💻 Funcionalidades
 
-Yes, you can!
+- 🔐 Login com JWT
+- 👥 CRUD de Clientes
+- 📅 CRUD de Agendamentos
+- ✅ Marcar agendamento como "concluído"
+- ❌ Cancelar agendamento
+- 🔍 Busca por nome ou serviço
+- 🔒 Rotas protegidas por token
+- 📊 Painel moderno e responsivo
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🗂️ Estrutura de Pastas
+📁 frontend/
+├──src/
+├── components/
+│ ├── AppointmentList.tsx
+│ ├── EditAppointmentModal.jsx
+│ └── AddClientModal.tsx
+├── instance/
+│ └── api.js
+├── hooks/
+│ └── use-toast.ts
+├── pages/
+│ └── Dashboard.tsx
+
+
+
+📁 backend/
+├── src/
+│ ├── controllers/
+│ ├── routes/
+│ ├── models/
+│ └── middleware/authMiddleware.js
+├── .env
+└── server.js
+
+yaml
+Copiar
+Editar
+
+---
+
+## 🧪 Como Rodar Localmente
+
+### 1. Clone o Repositório
+
+```bash
+git clone https://github.com/seu-usuario/agenda-facil.git
+cd agenda-facil
+2. Configure o Backend
+bash
+
+cd backend
+cp .env.example .env # configure banco, JWT_SECRET, etc.
+npm install
+npx sequelize db:migrate
+npm run dev
+3. Configure o Frontend
+bash
+Copiar
+Editar
+cd frontend
+npm install
+npm run dev
+🔐 Autenticação JWT
+Após login, o token JWT é salvo no localStorage e usado automaticamente via interceptor do Axios:
+
+
+// api.js
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+🤝 Contribuições
+Sinta-se à vontade para abrir issues, enviar pull requests, ou sugerir melhorias.
+
+📄 Licença
+Este projeto está sob a MIT License.
+
+
+## Desenvolvido por Davi Monteiro
