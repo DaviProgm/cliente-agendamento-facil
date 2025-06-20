@@ -20,12 +20,18 @@ const Dashboard = () => {
   const [totalClientes, setTotalClientes] = useState(0);
   const navigate = useNavigate();
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (!token) {
       navigate("/login");
+    } else {
+      setIsLoading(false); // Liberado pra renderizar
     }
   }, [navigate]);
+
 
   useEffect(() => {
     async function fetchAgendamentos() {
@@ -238,7 +244,7 @@ const Dashboard = () => {
       <AddAppointmentModal
         isOpen={isAppointmentModalOpen}
         onClose={() => setIsAppointmentModalOpen(false)}
-        onCreated={() => {}}
+        onCreated={() => { }}
       />
     </div>
   );
