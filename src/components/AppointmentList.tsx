@@ -18,43 +18,66 @@ const AppointmentList = ({ onAddAppointment }) => {
     fetchAppointments();
   }, []);
 
- const fetchAppointments = async () => {
-  try {
-    const token = localStorage.getItem("token"); // ou de onde você guarda o token
+  const fetchAppointments = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-    const res = await axios.get("https://schedule-control-api.onrender.com/agendamentos", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      if (!token) {
+        toast({
+          title: "Acesso não autorizado",
+          description: "Faça login para visualizar seus agendamentos.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (!Array.isArray(res.data)) {
-      toast({
-        title: "Erro",
-        description: "Resposta inválida da API.",
-        variant: "destructive",
+      const res = await axios.get("https://schedule-control-api.onrender.com/agendamentos", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      return;
-    }
 
-    const dataWithStatus = res.data.map((item) => ({
-      ...item,
-      status: "agendado",
-    }));
-    setAppointments(dataWithStatus);
-  } catch (error) {
-    console.error("Erro ao buscar agendamentos:", error);
-    toast({
-      title: "Erro",
-      description: "Não foi possível carregar os agendamentos. Verifique autenticação.",
-      variant: "destructive",
-    });
-  }
-};
+      if (!Array.isArray(res.data)) {
+        throw new Error("Resposta inesperada da API");
+      }
+
+      const dataWithStatus = res.data.map((item) => ({
+        ...item,
+        status: item.status || "agendado",
+      }));
+
+      setAppointments(dataWithStatus);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          toast({
+            title: "Sessão expirada",
+            description: "Sua sessão expirou. Faça login novamente.",
+            variant: "destructive",
+          });
+          // Ex: redirecionar:
+          // window.location.href = "/login";
+        } else {
+          toast({
+            title: "Erro ao buscar agendamentos",
+            description: error.response?.data?.message || "Erro inesperado no servidor.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Erro inesperado",
+          description: error?.message || "Erro desconhecido.",
+          variant: "destructive",
+        });
+      }
+      console.error("Erro ao buscar agendamentos:", error);
+    }
+  };
 
   const filteredAppointments = appointments.filter((appointment) =>
-    (appointment.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      appointment.service?.toLowerCase().includes(searchTerm.toLowerCase()))
+    appointment.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    appointment.service?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusColor = (status) => {
@@ -95,7 +118,7 @@ const AppointmentList = ({ onAddAppointment }) => {
   const handleUpdated = () => {
     setIsEditModalOpen(false);
     setSelectedAppointment(null);
-    fetchAppointments(); // recarregar lista após edição
+    fetchAppointments(); // Atualiza após edição
   };
 
   return (
