@@ -17,7 +17,7 @@ const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [agendamentosHoje, setAgendamentosHoje] = useState(0);
   const [agendamentosMes, setAgendamentosMes] = useState(0);
-  const [totalClientes, setTotalClientes] = useState(0); // opcional se tiver clientes
+  const [totalClientes, setTotalClientes] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,46 +30,51 @@ const Dashboard = () => {
   useEffect(() => {
     async function fetchAgendamentos() {
       try {
-        const response = await axios.get("https://schedule-control-api.onrender.com/agendamentos");
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.warn("Token não encontrado.");
+          navigate("/login");
+          return;
+        }
+
+        const response = await axios.get(
+          "https://schedule-control-api.onrender.com/agendamentos",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
         const agendamentos = response.data;
 
         const hoje = new Date();
         const hojeStr = hoje.toISOString().split("T")[0]; // 'YYYY-MM-DD'
-        const mesAtual = hoje.getMonth(); // 0-indexed (0 = jan)
+        const mesAtual = hoje.getMonth();
         const anoAtual = hoje.getFullYear();
 
-        // Contar agendamentos de hoje
-        const countHoje = agendamentos.filter(
-          (ag: any) => ag.date === hojeStr
-        ).length;
+        const countHoje = agendamentos.filter((ag: any) => ag.date === hojeStr).length;
 
-        // Contar agendamentos do mês atual
         const countMes = agendamentos.filter((ag: any) => {
           const dataAg = new Date(ag.date);
           return (
-            dataAg.getMonth() === mesAtual && dataAg.getFullYear() === anoAtual
+            dataAg.getMonth() === mesAtual &&
+            dataAg.getFullYear() === anoAtual
           );
         }).length;
 
         setAgendamentosHoje(countHoje);
         setAgendamentosMes(countMes);
-
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao buscar agendamentos:", error);
+        if (error?.response?.status === 401) {
+          navigate("/login");
+        }
       }
     }
 
-    // Você pode fazer um fetch para clientes se tiver a rota e quiser contar totalClientes
-    // async function fetchClientes() {
-    //   try {
-    //     const response = await axios.get("https://schedule-control-api.onrender.com/clientes");
-    //     setTotalClientes(response.data.length);
-    //   } catch {}
-    // }
-    // fetchClientes();
-
     fetchAgendamentos();
-  }, []);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -86,6 +91,7 @@ const Dashboard = () => {
         return (
           <AppointmentList
             onAddAppointment={() => setIsAppointmentModalOpen(true)}
+            refreshFlag={false}
           />
         );
       default:
@@ -132,7 +138,6 @@ const Dashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar Desktop */}
       <div className="hidden lg:block">
         <Sidebar
           activeTab={activeTab}
@@ -141,7 +146,6 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Sidebar Mobile Overlay */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
@@ -234,6 +238,7 @@ const Dashboard = () => {
       <AddAppointmentModal
         isOpen={isAppointmentModalOpen}
         onClose={() => setIsAppointmentModalOpen(false)}
+        onCreated={() => {}}
       />
     </div>
   );

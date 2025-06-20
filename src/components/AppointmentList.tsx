@@ -30,14 +30,12 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
-  // Função para formatar data YYYY-MM-DD para DD/MM/YYYY
   const formatDateToBR = (dateString: string) => {
     if (!dateString) return "";
     const [year, month, day] = dateString.split("-");
     return `${day}/${month}/${year}`;
   };
 
-  // ✅ Requisição otimizada com useCallback
   const fetchAppointments = useCallback(async () => {
     try {
       const res = await api.get("/agendamentos");
@@ -67,19 +65,16 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
     }
   }, []);
 
-  // Atualiza ao montar ou quando refreshFlag muda
   useEffect(() => {
     fetchAppointments();
   }, [fetchAppointments, refreshFlag]);
 
-  // ✅ Busca com case insensitive
   const filteredAppointments = appointments.filter(
     (appointment) =>
       appointment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       appointment.service.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // ✅ Badge status com cor adequada
   const getStatusColor = (status: string = "agendado") => {
     switch (status) {
       case "agendado":
@@ -93,22 +88,37 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
     }
   };
 
-  // ✅ Concluir agendamento (simulado no frontend)
-  const handleCompleteAppointment = (appointmentId: number) => {
-    setAppointments((prev) =>
-      prev.map((appointment) =>
-        appointment.id === appointmentId ? { ...appointment, status: "concluído" } : appointment
-      )
-    );
-
+  const handleCompleteAppointment = async (appointmentId: number) => {
     const appointment = appointments.find((app) => app.id === appointmentId);
-    toast({
-      title: "Agendamento concluído!",
-      description: `O agendamento de ${appointment?.name} foi marcado como concluído.`,
-    });
 
-    // Aqui você pode fazer chamada PUT real para atualizar backend, se desejar
-    // await api.put(`/agendamentos/${appointmentId}`, { ...appointment, status: 'concluído' });
+    if (!appointment) {
+      toast({
+        title: "Erro",
+        description: "Agendamento não encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await api.delete(`/${appointmentId}`);
+
+      setAppointments((prev) =>
+        prev.filter((appointment) => appointment.id !== appointmentId)
+      );
+
+      toast({
+        title: "Agendamento concluído!",
+        description: `O agendamento de ${appointment.name} foi concluido com sucesso.`,
+      });
+    } catch (error) {
+      console.error("Erro ao concluir agendamento:", error);
+      toast({
+        title: "Erro ao concluir",
+        description: "Não foi possível excluir o agendamento.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditClick = (appointment: Appointment) => {
@@ -205,4 +215,3 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
 };
 
 export default AppointmentList;
-  
