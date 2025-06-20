@@ -6,24 +6,43 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import EditAppointmentModal from "../components/EditAppointmentModal";
+import EditAppointmentModal from "./EditAppointmentmodal";
 
-const AppointmentList = ({ onAddAppointment }) => {
+// Definindo tipos básicos para agendamento (ajuste conforme seu modelo real)
+interface Appointment {
+  id: number;
+  name: string;
+  service: string;
+  date: string; // ISO string
+  time: string;
+  observations?: string;
+  status?: string;
+}
+
+interface AppointmentListProps {
+  onAddAppointment: () => void;
+  refreshFlag: boolean; // Novo prop que vem do pai
+}
+
+const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, refreshFlag }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [appointments, setAppointments] = useState([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
+  // Sempre que refreshFlag mudar, busca a lista de agendamentos
   useEffect(() => {
     fetchAppointments();
-  }, []);
+  }, [refreshFlag]);
+
+  // Você pode manter ou retirar o useEffect sem dependências, 
+  // mas assim garante atualização na montagem e no refreshFlag
 
   const fetchAppointments = async () => {
     try {
-      const token = localStorage.getItem("token"); // ou de onde você guarda o token
+      const token = localStorage.getItem("token");
 
       const res = await api.get("/agendamentos");
-
 
       if (!Array.isArray(res.data)) {
         toast({
@@ -34,10 +53,11 @@ const AppointmentList = ({ onAddAppointment }) => {
         return;
       }
 
-      const dataWithStatus = res.data.map((item) => ({
+      const dataWithStatus = res.data.map((item: Appointment) => ({
         ...item,
-        status: "agendado",
+        status: item.status ?? "agendado",
       }));
+
       setAppointments(dataWithStatus);
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);
@@ -49,12 +69,13 @@ const AppointmentList = ({ onAddAppointment }) => {
     }
   };
 
-  const filteredAppointments = appointments.filter((appointment) =>
-  (appointment.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.service?.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredAppointments = appointments.filter(
+    (appointment) =>
+      appointment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      appointment.service.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status?: string) => {
     switch (status) {
       case "agendado":
         return "default";
@@ -67,12 +88,10 @@ const AppointmentList = ({ onAddAppointment }) => {
     }
   };
 
-  const handleCompleteAppointment = (appointmentId) => {
+  const handleCompleteAppointment = (appointmentId: number) => {
     setAppointments((prev) =>
       prev.map((appointment) =>
-        appointment.id === appointmentId
-          ? { ...appointment, status: "concluído" }
-          : appointment
+        appointment.id === appointmentId ? { ...appointment, status: "concluído" } : appointment
       )
     );
 
@@ -84,7 +103,7 @@ const AppointmentList = ({ onAddAppointment }) => {
     });
   };
 
-  const handleEditClick = (appointment) => {
+  const handleEditClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setIsEditModalOpen(true);
   };
@@ -92,7 +111,7 @@ const AppointmentList = ({ onAddAppointment }) => {
   const handleUpdated = () => {
     setIsEditModalOpen(false);
     setSelectedAppointment(null);
-    fetchAppointments(); // recarregar lista após edição
+    fetchAppointments();
   };
 
   return (
@@ -124,7 +143,7 @@ const AppointmentList = ({ onAddAppointment }) => {
                     <p className="text-sm text-gray-600">{appointment.service}</p>
                   </div>
                   <Badge
-                    variant={getStatusColor(appointment.status ?? "agendado")}
+                    variant={getStatusColor(appointment.status)}
                     className="self-start"
                   >
                     {appointment.status ?? "agendado"}
