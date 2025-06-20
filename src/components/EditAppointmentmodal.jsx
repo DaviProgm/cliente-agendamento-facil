@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import api from "../instance/api.js";
 import { toast } from "sonner";
 
-// Props type definition removed because this is a JavaScript file.
-
 const EditAppointmentModal = ({
   isOpen,
   onClose,
@@ -27,26 +25,35 @@ const EditAppointmentModal = ({
         service: appointment.service || "",
         date: appointment.date || "",
         time: appointment.time || "",
-        observations: appointment.observations || "", // CORRIGIDO
+        observations: appointment.observations || "",
+      });
+    } else {
+      // Limpa o formulário ao fechar ou zerar appointment
+      setFormData({
+        name: "",
+        service: "",
+        date: "",
+        time: "",
+        observations: "",
       });
     }
   }, [appointment]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!appointment || !appointment.id) {
+      toast.error("Agendamento inválido para atualização.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await api.put(`/agendamentos/${appointment.id}`, {
-        name: formData.name,
-        service: formData.service,
-        date: formData.date,
-        time: formData.time,
-        observations: formData.observations,
-      });
+      await api.put(`/agendamentos/${appointment.id}`, formData);
 
       toast.success("Agendamento atualizado com sucesso!");
-      onUpdated();
-      onClose(); // fecha o modal depois de salvar
+      if (typeof onUpdated === "function") onUpdated();
+      onClose();
     } catch (error) {
       console.error("Erro ao atualizar agendamento:", error.response?.data || error.message);
       toast.error("Erro ao atualizar agendamento.");
