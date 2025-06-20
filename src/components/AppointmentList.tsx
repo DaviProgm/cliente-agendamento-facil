@@ -18,6 +18,14 @@ interface Appointment {
   observations?: string;
   status?: "agendado" | "concluído" | "cancelado" | string;
 }
+const statusOptions = [
+  "agendado",
+  "confirmado",
+  "em andamento",
+  "concluído",
+  "cancelado",
+];
+
 
 interface AppointmentListProps {
   onAddAppointment: () => void;
@@ -87,6 +95,34 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
         return "default";
     }
   };
+  const handleStatusChange = async (appointmentId: number, newStatus: string) => {
+    try {
+      await api.put(`/${appointmentId}/status`, {
+        status: newStatus,
+      });
+
+      setAppointments((prev) =>
+        prev.map((appointment) =>
+          appointment.id === appointmentId
+            ? { ...appointment, status: newStatus }
+            : appointment
+        )
+      );
+
+      toast({
+        title: "Status atualizado",
+        description: `O agendamento foi marcado como "${newStatus}".`,
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+      toast({
+        title: "Erro ao atualizar status",
+        description: "Ocorreu um problema. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   const handleCompleteAppointment = async (appointmentId: number) => {
     const appointment = appointments.find((app) => app.id === appointmentId);
@@ -160,12 +196,30 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
                     <CardTitle className="text-lg truncate">{appointment.name}</CardTitle>
                     <p className="text-sm text-gray-600">{appointment.service}</p>
                   </div>
-                  <Badge
-                    variant={getStatusColor(appointment.status)}
-                    className="self-start"
+                  <select
+                    aria-label="Alterar status do agendamento"
+                    value={appointment.status}
+                    onChange={(e) => handleStatusChange(appointment.id, e.target.value)}
+                    className={`
+    text-sm rounded px-2 py-1 border 
+    focus:outline-none focus:ring-2 focus:ring-blue-400
+    ${getStatusColor(appointment.status) === "default"
+                        ? "bg-gray-100 border-gray-300 text-gray-700"
+                        : getStatusColor(appointment.status) === "secondary"
+                          ? "bg-blue-100 border-blue-300 text-blue-800"
+                          : getStatusColor(appointment.status) === "destructive"
+                            ? "bg-red-100 border-red-300 text-red-800"
+                            : "bg-gray-100 border-gray-300 text-gray-700"
+                      }
+  `}
                   >
-                    {appointment.status}
-                  </Badge>
+                    {statusOptions.map((status) => (
+                      <option key={status} value={status}>
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
