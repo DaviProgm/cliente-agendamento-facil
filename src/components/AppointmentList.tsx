@@ -1,42 +1,60 @@
 import { useState, useEffect } from "react";
-import axios from "axios"; 
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import EditAppointmentModal from "@/components/AddAppointmentModal"; 
+import EditAppointmentModal from "@/components/EditAppointmentModal";
 
 const AppointmentList = ({ onAddAppointment }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [appointments, setAppointments] = useState([]);
-
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   useEffect(() => {
-    axios.get("https://schedule-control-api.onrender.com/agendamentos")
-      .then(res => {
-        const dataWithStatus = res.data.map(item => ({
-          ...item,
-          status: "agendado",
-        }));
-        setAppointments(dataWithStatus);
-      })
-      .catch(err => {
-        console.error("Erro ao buscar agendamentos:", err);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar os agendamentos.",
-          variant: "destructive"
-        });
-      });
+    fetchAppointments();
   }, []);
 
-  const filteredAppointments = appointments.filter(appointment =>
-    appointment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.service.toLowerCase().includes(searchTerm.toLowerCase())
+ const fetchAppointments = async () => {
+  try {
+    const token = localStorage.getItem("token"); // ou de onde você guarda o token
+
+    const res = await axios.get("https://schedule-control-api.onrender.com/agendamentos", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!Array.isArray(res.data)) {
+      toast({
+        title: "Erro",
+        description: "Resposta inválida da API.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const dataWithStatus = res.data.map((item) => ({
+      ...item,
+      status: "agendado",
+    }));
+    setAppointments(dataWithStatus);
+  } catch (error) {
+    console.error("Erro ao buscar agendamentos:", error);
+    toast({
+      title: "Erro",
+      description: "Não foi possível carregar os agendamentos. Verifique autenticação.",
+      variant: "destructive",
+    });
+  }
+};
+
+  const filteredAppointments = appointments.filter((appointment) =>
+    (appointment.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      appointment.service?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const getStatusColor = (status) => {
@@ -53,15 +71,15 @@ const AppointmentList = ({ onAddAppointment }) => {
   };
 
   const handleCompleteAppointment = (appointmentId) => {
-    setAppointments(prev =>
-      prev.map(appointment =>
+    setAppointments((prev) =>
+      prev.map((appointment) =>
         appointment.id === appointmentId
           ? { ...appointment, status: "concluído" }
           : appointment
       )
     );
 
-    const appointment = appointments.find(app => app.id === appointmentId);
+    const appointment = appointments.find((app) => app.id === appointmentId);
 
     toast({
       title: "Agendamento concluído!",
@@ -77,14 +95,7 @@ const AppointmentList = ({ onAddAppointment }) => {
   const handleUpdated = () => {
     setIsEditModalOpen(false);
     setSelectedAppointment(null);
-    axios.get("https://schedule-control-api.onrender.com/agendamentos")
-      .then(res => {
-        const dataWithStatus = res.data.map(item => ({
-          ...item,
-          status: "agendado",
-        }));
-        setAppointments(dataWithStatus);
-      });
+    fetchAppointments(); // recarregar lista após edição
   };
 
   return (
@@ -115,7 +126,10 @@ const AppointmentList = ({ onAddAppointment }) => {
                     <CardTitle className="text-lg truncate">{appointment.name}</CardTitle>
                     <p className="text-sm text-gray-600">{appointment.service}</p>
                   </div>
-                  <Badge variant={getStatusColor(appointment.status ?? "agendado")} className="self-start">
+                  <Badge
+                    variant={getStatusColor(appointment.status ?? "agendado")}
+                    className="self-start"
+                  >
                     {appointment.status ?? "agendado"}
                   </Badge>
                 </div>
@@ -124,18 +138,18 @@ const AppointmentList = ({ onAddAppointment }) => {
                 <div className="flex flex-col gap-3">
                   <div>
                     <p className="text-sm text-gray-600">
-                      {new Date(appointment.date).toLocaleDateString('pt-BR')} às {appointment.time}
+                      {new Date(appointment.date).toLocaleDateString("pt-BR")} às {appointment.time}
                     </p>
                     {appointment.observations && (
                       <p className="text-sm text-gray-500 mt-1">{appointment.observations}</p>
                     )}
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="w-full sm:w-auto"
-                      onClick={() => handleEditClick(appointment)} 
+                      onClick={() => handleEditClick(appointment)}
                     >
                       Editar
                     </Button>
@@ -156,9 +170,11 @@ const AppointmentList = ({ onAddAppointment }) => {
         </div>
       </div>
 
-       <EditAppointmentModal
+      <EditAppointmentModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
+        appointment={selectedAppointment}
+        onUpdated={handleUpdated}
       />
     </>
   );

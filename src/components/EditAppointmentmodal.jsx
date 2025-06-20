@@ -2,26 +2,32 @@ import { useState, useEffect } from "react";
 import api from "../instance/api.js";
 import { toast } from "sonner";
 
-const EditAppointmentModal = ({ isOpen, onClose, appointment, onUpdated }) => {
+// Props type definition removed because this is a JavaScript file.
+
+const EditAppointmentModal = ({
+  isOpen,
+  onClose,
+  appointment,
+  onUpdated,
+}) => {
   const [formData, setFormData] = useState({
-    clientName: "",
+    name: "",
     service: "",
     date: "",
     time: "",
-    notes: "",
+    observations: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Quando o modal abrir ou o appointment mudar, atualiza o formData
   useEffect(() => {
     if (appointment) {
       setFormData({
-        clientName: appointment.name || "",
+        name: appointment.name || "",
         service: appointment.service || "",
         date: appointment.date || "",
         time: appointment.time || "",
-        notes: appointment.observations || "",
+        observations: appointment.observations || "", // CORRIGIDO
       });
     }
   }, [appointment]);
@@ -31,14 +37,16 @@ const EditAppointmentModal = ({ isOpen, onClose, appointment, onUpdated }) => {
     setIsSubmitting(true);
     try {
       await api.put(`/agendamentos/${appointment.id}`, {
-        name: formData.clientName,
+        name: formData.name,
         service: formData.service,
         date: formData.date,
         time: formData.time,
-        observations: formData.notes,
+        observations: formData.observations,
       });
+
       toast.success("Agendamento atualizado com sucesso!");
       onUpdated();
+      onClose(); // fecha o modal depois de salvar
     } catch (error) {
       console.error("Erro ao atualizar agendamento:", error.response?.data || error.message);
       toast.error("Erro ao atualizar agendamento.");
@@ -52,21 +60,24 @@ const EditAppointmentModal = ({ isOpen, onClose, appointment, onUpdated }) => {
   return (
     <div className="modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="modal-content bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-        <button
-          onClick={onClose}
-          disabled={isSubmitting}
-          className="text-sm text-red-500 mb-4"
-        >
-          Fechar
-        </button>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Editar Agendamento</h2>
+          <button
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="text-sm text-red-500"
+          >
+            Fechar
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
             placeholder="Nome do cliente"
-            value={formData.clientName}
+            value={formData.name}
             onChange={(e) =>
-              setFormData({ ...formData, clientName: e.target.value })
+              setFormData({ ...formData, name: e.target.value })
             }
             required
             className="w-full border rounded px-3 py-2"
@@ -105,9 +116,9 @@ const EditAppointmentModal = ({ isOpen, onClose, appointment, onUpdated }) => {
 
           <textarea
             placeholder="Observações"
-            value={formData.notes}
+            value={formData.observations}
             onChange={(e) =>
-              setFormData({ ...formData, notes: e.target.value })
+              setFormData({ ...formData, observations: e.target.value })
             }
             className="w-full border rounded px-3 py-2"
           />

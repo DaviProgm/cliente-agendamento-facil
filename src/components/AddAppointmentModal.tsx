@@ -1,131 +1,114 @@
-import { useState, useEffect } from "react";
-import api from "../instance/api.js";
+import React, { useState } from "react";
+import api from "../instance/api"; // axios configurado
 import { toast } from "sonner";
 
-type AddAppointmentModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-};
-
-const EditAppointmentModal = ({ isOpen, onClose }: AddAppointmentModalProps) => {
+const AddAppointmentModal = ({ isOpen, onClose, onCreated }) => {
   const [formData, setFormData] = useState({
-    clientName: "",
+    name: "",
     service: "",
     date: "",
     time: "",
-    notes: "",
+    observations: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
+  if (!isOpen) return null;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await api.post("/agendamentos", formData);
+      toast.success("Agendamento criado com sucesso!");
+
+      if (typeof onCreated === "function") {
+        onCreated(response.data);
+      }
+
       setFormData({
-        clientName: "",
+        name: "",
         service: "",
         date: "",
         time: "",
-        notes: "",
-      });
-    }
-  }, [isOpen]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      await api.post("/agendamentos", {
-        name: formData.clientName,
-        service: formData.service,
-        date: formData.date,
-        time: formData.time,
-        observations: formData.notes,
+        observations: "",
       });
 
-      toast.success("Agendamento criado com sucesso!");
-      onClose(); 
-    } catch (error: any) {
-      console.error("Erro ao criar agendamento:", error.response?.data || error.message);
-      toast.error("Erro ao criar agendamento. Verifique os dados e tente novamente.");
+      onClose();
+    } catch (error) {
+      toast.error(
+        "Erro ao criar agendamento: " +
+          (error.response?.data?.message || error.message)
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <div className="modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="modal-content bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Novo Agendamento</h2>
-          <button
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="text-sm text-red-500"
-          >
-            Fechar
-          </button>
-        </div>
-
+        <h2 className="text-lg font-semibold mb-4">Criar Agendamento</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
-            type="text"
-            placeholder="Nome do cliente"
-            value={formData.clientName}
-            onChange={(e) =>
-              setFormData({ ...formData, clientName: e.target.value })
-            }
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Nome do Cliente"
             required
             className="w-full border rounded px-3 py-2"
           />
-
           <input
-            type="text"
-            placeholder="Serviço"
+            name="service"
             value={formData.service}
-            onChange={(e) =>
-              setFormData({ ...formData, service: e.target.value })
-            }
+            onChange={handleChange}
+            placeholder="Serviço"
             required
             className="w-full border rounded px-3 py-2"
           />
-
           <input
             type="date"
+            name="date"
             value={formData.date}
-            onChange={(e) =>
-              setFormData({ ...formData, date: e.target.value })
-            }
+            onChange={handleChange}
             required
             className="w-full border rounded px-3 py-2"
           />
-
           <input
             type="time"
+            name="time"
             value={formData.time}
-            onChange={(e) =>
-              setFormData({ ...formData, time: e.target.value })
-            }
+            onChange={handleChange}
             required
             className="w-full border rounded px-3 py-2"
           />
-
           <textarea
+            name="observations"
+            value={formData.observations}
+            onChange={handleChange}
             placeholder="Observações"
-            value={formData.notes}
-            onChange={(e) =>
-              setFormData({ ...formData, notes: e.target.value })
-            }
             className="w-full border rounded px-3 py-2"
           />
-
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
           >
-            {isSubmitting ? "Salvando..." : "Salvar Agendamento"}
+            {isSubmitting ? "Salvando..." : "Salvar"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="w-full mt-2 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 rounded"
+          >
+            Cancelar
           </button>
         </form>
       </div>
@@ -133,4 +116,4 @@ const EditAppointmentModal = ({ isOpen, onClose }: AddAppointmentModalProps) => 
   );
 };
 
-export default EditAppointmentModal;
+export default AddAppointmentModal;
