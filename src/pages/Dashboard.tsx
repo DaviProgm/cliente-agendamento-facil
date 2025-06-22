@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Users, UserPlus, Menu } from "lucide-react";
@@ -9,6 +8,7 @@ import ClientList from "@/components/ClientList";
 import AppointmentList from "@/components/AppointmentList";
 import AddClientModal from "@/components/AddClientModal";
 import AddAppointmentModal from "@/components/AddAppointmentModal";
+import api from "@/instance/api"; // sua instância axios configurada
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -18,40 +18,25 @@ const Dashboard = () => {
   const [agendamentosHoje, setAgendamentosHoje] = useState(0);
   const [agendamentosMes, setAgendamentosMes] = useState(0);
   const [totalClientes, setTotalClientes] = useState(0);
-  const navigate = useNavigate();
-
   const [isLoading, setIsLoading] = useState(true);
 
+  const navigate = useNavigate();
+
+  // Verifica token e controla loading inicial
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       navigate("/login");
     } else {
-      setIsLoading(false); // Liberado pra renderizar
+      setIsLoading(false);
     }
   }, [navigate]);
 
-
+  // Busca agendamentos
   useEffect(() => {
-    async function fetchAgendamentos() {
+    const fetchAgendamentos = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.warn("Token não encontrado.");
-          navigate("/login");
-          return;
-        }
-
-        const response = await axios.get(
-          "https://schedule-control-api.onrender.com/agendamentos",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
+        const response = await api.get("/agendamentos");
         const agendamentos = response.data;
 
         const hoje = new Date();
@@ -59,13 +44,14 @@ const Dashboard = () => {
         const mesAtual = hoje.getMonth();
         const anoAtual = hoje.getFullYear();
 
-        const countHoje = agendamentos.filter((ag: any) => ag.date === hojeStr).length;
+        const countHoje = agendamentos.filter(
+          (ag: any) => ag.date === hojeStr
+        ).length;
 
         const countMes = agendamentos.filter((ag: any) => {
           const dataAg = new Date(ag.date);
           return (
-            dataAg.getMonth() === mesAtual &&
-            dataAg.getFullYear() === anoAtual
+            dataAg.getMonth() === mesAtual && dataAg.getFullYear() === anoAtual
           );
         }).length;
 
@@ -73,14 +59,28 @@ const Dashboard = () => {
         setAgendamentosMes(countMes);
       } catch (error: any) {
         console.error("Erro ao buscar agendamentos:", error);
+        // Se der 401, o interceptor já redireciona, mas aqui evita problema no uso
         if (error?.response?.status === 401) {
           navigate("/login");
         }
       }
-    }
+    };
 
     fetchAgendamentos();
   }, [navigate]);
+
+  // Opcional: Buscar total de clientes (ajuste se tiver API)
+  useEffect(() => {
+    const fetchClientes = async () => {
+      try {
+        const response = await api.get("/clientes");
+        setTotalClientes(response.data.length);
+      } catch (error) {
+        console.error("Erro ao buscar clientes:", error);
+      }
+    };
+    fetchClientes();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -109,7 +109,7 @@ const Dashboard = () => {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{totalClientes || 25}</div>
+                <div className="text-2xl font-bold">{totalClientes || 0}</div>
                 <p className="text-xs text-muted-foreground">+2 novos este mês</p>
               </CardContent>
             </Card>
@@ -141,6 +141,14 @@ const Dashboard = () => {
         );
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -244,7 +252,7 @@ const Dashboard = () => {
       <AddAppointmentModal
         isOpen={isAppointmentModalOpen}
         onClose={() => setIsAppointmentModalOpen(false)}
-        onCreated={() => { }}
+        onCreated={() => {}}
       />
     </div>
   );
