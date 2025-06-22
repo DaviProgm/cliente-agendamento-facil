@@ -1,50 +1,65 @@
-import React, { useState } from "react";
+// src/components/AddAppointmentModal.tsx
+import React, { useState, useEffect } from "react";
 import api from "../instance/api"; // axios configurado
 import { toast } from "sonner";
 
 const AddAppointmentModal = ({ isOpen, onClose, onCreated }) => {
+  const [clients, setClients] = useState([]);
   const [formData, setFormData] = useState({
-    name: "",
+    clientId: 0,
     service: "",
     date: "",
     time: "",
     observations: "",
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      api.get("/clientes")
+        .then((res) => setClients(res.data))
+        .catch(() => setClients([]));
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === "clientId" ? Number(value) : value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.clientId) {
+      toast.error("Selecione um cliente para o agendamento.");
+      return;
+    }
+
     setIsSubmitting(true);
+    console.log("Enviando ao backend:", formData);
 
     try {
-      const response = await api.post("/agendamentos", formData);
-      toast.success("Agendamento criado com sucesso!");
-
-      if (typeof onCreated === "function") {
-        onCreated(response.data);
-      }
-
-      setFormData({
-        name: "",
-        service: "",
-        date: "",
-        time: "",
-        observations: "",
+      const response = await api.post("/agendamentos", formData, {
+        headers: { "Content-Type": "application/json" },
       });
 
+      toast.success("Agendamento criado com sucesso!");
+
+      // Passa apenas o schedule para onCreated
+      onCreated?.(response.data.schedule);
+
+      setFormData({ clientId: 0, service: "", date: "", time: "", observations: "" });
       onClose();
     } catch (error) {
+      console.error("Erro na requisição:", error.response?.data || error.message);
       toast.error(
         "Erro ao criar agendamento: " +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     } finally {
       setIsSubmitting(false);
@@ -56,14 +71,21 @@ const AddAppointmentModal = ({ isOpen, onClose, onCreated }) => {
       <div className="modal-content bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Criar Agendamento</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            name="name"
-            value={formData.name}
+          <select
+            name="clientId"
+            value={formData.clientId}
             onChange={handleChange}
-            placeholder="Nome do Cliente"
             required
             className="w-full border rounded px-3 py-2"
-          />
+          >
+            <option value={0} disabled>Selecione um cliente</option>
+            {clients.map(c => (
+              <option key={c.id} value={c.id}>
+                {c.name} ({c.email})
+              </option>
+            ))}
+          </select>
+
           <input
             name="service"
             value={formData.service}

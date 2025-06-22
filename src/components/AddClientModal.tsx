@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,30 +12,38 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
+import { createClient } from "@/services/clientService"; // ✅ Integração com API
 
 interface AddClientModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCreated?: () => void; // ✅ Para atualizar a lista de clientes se quiser
 }
 
-const AddClientModal = ({ isOpen, onClose }: AddClientModalProps) => {
+const AddClientModal = ({ isOpen, onClose, onCreated }: AddClientModalProps) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     address: "",
-    notes: "",
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simular envio para backend - aqui você integrará com sua API
-    setTimeout(() => {
-      console.log("Dados do cliente para enviar ao backend:", formData);
-      
+    try {
+      await createClient(formData);
+
       toast({
         title: "Cliente adicionado com sucesso!",
         description: `${formData.name} foi adicionado à lista de clientes.`,
@@ -48,19 +55,21 @@ const AddClientModal = ({ isOpen, onClose }: AddClientModalProps) => {
         email: "",
         phone: "",
         address: "",
-        notes: "",
       });
-      
-      setIsSubmitting(false);
-      onClose();
-    }, 1000);
-  };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+      onClose();
+      onCreated?.(); // Atualiza a lista, se passado
+    } catch (error: any) {
+      console.error("Erro ao criar cliente:", error);
+      toast({
+        title: "Erro ao adicionar cliente",
+        description:
+          error.response?.data?.message || "Erro inesperado ao criar cliente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -72,7 +81,7 @@ const AddClientModal = ({ isOpen, onClose }: AddClientModalProps) => {
             Preencha as informações do cliente abaixo.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nome *</Label>
@@ -84,7 +93,7 @@ const AddClientModal = ({ isOpen, onClose }: AddClientModalProps) => {
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="email">Email *</Label>
             <Input
@@ -96,7 +105,7 @@ const AddClientModal = ({ isOpen, onClose }: AddClientModalProps) => {
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="phone">Telefone *</Label>
             <Input
@@ -107,7 +116,7 @@ const AddClientModal = ({ isOpen, onClose }: AddClientModalProps) => {
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="address">Endereço</Label>
             <Input
@@ -115,17 +124,6 @@ const AddClientModal = ({ isOpen, onClose }: AddClientModalProps) => {
               value={formData.address}
               onChange={(e) => handleInputChange("address", e.target.value)}
               placeholder="Endereço completo"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="notes">Observações</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => handleInputChange("notes", e.target.value)}
-              placeholder="Informações adicionais"
-              rows={3}
             />
           </div>
         </form>

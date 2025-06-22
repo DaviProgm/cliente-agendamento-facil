@@ -1,18 +1,22 @@
-
-import { useState } from "react";
+// src/components/ClientList.tsx
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import ClientDetailsModal from "@/components/ClientDetailsModal";
+import api from "@/instance/api";
+import { toast } from "@/hooks/use-toast";
 
 interface Client {
   id: number;
   name: string;
   email: string;
   phone: string;
+  address?: string;
   status: "ativo" | "inativo";
-  lastAppointment: string;
+  lastAppointment?: string | null;
 }
 
 interface ClientListProps {
@@ -21,38 +25,58 @@ interface ClientListProps {
 
 const ClientList = ({ onAddClient }: ClientListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  
-  // Dados mock - substituir pela integração com backend
-  const [clients] = useState<Client[]>([
-    {
-      id: 1,
-      name: "João Silva",
-      email: "joao@email.com",
-      phone: "(11) 99999-9999",
-      status: "ativo",
-      lastAppointment: "2024-01-15",
-    },
-    {
-      id: 2,
-      name: "Maria Santos",
-      email: "maria@email.com",
-      phone: "(11) 88888-8888",
-      status: "ativo",
-      lastAppointment: "2024-01-10",
-    },
-    {
-      id: 3,
-      name: "Pedro Costa",
-      email: "pedro@email.com",
-      phone: "(11) 77777-7777",
-      status: "inativo",
-      lastAppointment: "2023-12-20",
-    },
-  ]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchTerm.toLowerCase())
+  // Função para formatar data ISO para dd/MM/yyyy
+  const formatDate = (isoDate?: string | null) => {
+    if (!isoDate) return "Nenhum";
+    const [year, month, day] = isoDate.split("T")[0].split("-");
+    return `${day}/${month}/${year}`;
+  };
+
+  useEffect(() => {
+    const fetchClientsWithLastAppointment = async () => {
+      try {
+        const responseClients = await api.get("/clientes");
+        const clientsData: Client[] = responseClients.data;
+
+        const clientsWithLastAppointment = await Promise.all(
+          clientsData.map(async (client) => {
+            try {
+              const resSchedules = await api.get(`/agendamentos?clientId=${client.id}`);
+              const schedules = resSchedules.data;
+              schedules.sort(
+                (a: { date: string }, b: { date: string }) =>
+                  new Date(b.date).getTime() - new Date(a.date).getTime()
+              );
+              const lastAppointment = schedules.length > 0 ? schedules[0].date : null;
+              return { ...client, status: client.status || "ativo", lastAppointment };
+            } catch {
+              return { ...client, status: client.status || "ativo", lastAppointment: null };
+            }
+          })
+        );
+
+        setClients(clientsWithLastAppointment);
+      } catch (error) {
+        console.error("Erro ao buscar clientes:", error);
+        toast({
+          title: "Erro ao carregar clientes",
+          description: "Verifique sua conexão ou tente novamente mais tarde.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchClientsWithLastAppointment();
+  }, []);
+
+  const filteredClients = clients.filter(
+    (client) =>
+      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -83,7 +107,10 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
                   <p className="text-sm text-gray-600 truncate">{client.email}</p>
                   <p className="text-sm text-gray-600">{client.phone}</p>
                 </div>
-                <Badge variant={client.status === "ativo" ? "default" : "secondary"} className="self-start">
+                <Badge
+                  variant={client.status === "ativo" ? "default" : "secondary"}
+                  className="self-start"
+                >
                   {client.status}
                 </Badge>
               </div>
@@ -91,9 +118,17 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
             <CardContent className="pt-0">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <p className="text-sm text-gray-600">
-                  Último agendamento: {new Date(client.lastAppointment).toLocaleDateString('pt-BR')}
+                  Último agendamento: {formatDate(client.lastAppointment)}
                 </p>
-                <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                  onClick={() => {
+                    setSelectedClient(client);
+                    setDetailsModalOpen(true);
+                  }}
+                >
                   Ver Detalhes
                 </Button>
               </div>
@@ -101,6 +136,12 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
           </Card>
         ))}
       </div>
+
+      <ClientDetailsModal
+        client={selectedClient}
+        isOpen={detailsModalOpen}
+        onClose={() => setDetailsModalOpen(false)}
+      />
     </div>
   );
 };

@@ -97,9 +97,10 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
   };
   const handleStatusChange = async (appointmentId: number, newStatus: string) => {
     try {
-      await api.put(`/${appointmentId}/status`, {
+      await api.put(`/agendamentos/${appointmentId}/status`, {
         status: newStatus,
       });
+
 
       setAppointments((prev) =>
         prev.map((appointment) =>
@@ -137,7 +138,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
     }
 
     try {
-      await api.delete(`/${appointmentId}`);
+      await api.delete(`/agendamentos/${appointmentId}`);
 
       setAppointments((prev) =>
         prev.filter((appointment) => appointment.id !== appointmentId)
