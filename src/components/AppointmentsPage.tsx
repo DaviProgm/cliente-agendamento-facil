@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AppointmentList from "./AppointmentList";
-import CreateAppointmentModal from "./AddAppointmentModal";
+import CreateAppointmentModal from "../components/AddAppointmentModal";
 
 const AppointmentsPage: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
@@ -9,8 +9,7 @@ const AppointmentsPage: React.FC = () => {
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
 
-  // Dispara refresh na lista ao criar novo agendamento
-  // Você pode tipar newAppointment conforme o tipo esperado do agendamento
+  // Quando um novo agendamento for criado, fecha o modal e dá refresh na lista
   const handleCreated = (newAppointment: any) => {
     setIsCreateModalOpen(false);
     setRefreshFlag((prev) => !prev);
@@ -25,7 +24,7 @@ const AppointmentsPage: React.FC = () => {
       <CreateAppointmentModal
         isOpen={isCreateModalOpen}
         onClose={closeCreateModal}
-        onCreated={handleCreated} // ESSENCIAL passar função
+        onCreated={handleCreated} // importante para atualizar a lista
       />
     </>
   );
