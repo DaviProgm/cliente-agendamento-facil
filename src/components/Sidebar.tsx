@@ -1,14 +1,16 @@
 
   import { Button } from "@/components/ui/button";
-  import { Calendar, Users, BarChart3, LogOut } from "lucide-react";
+import { on } from "events";
+  import { Calendar, Users, BarChart3, LogOut, AlignJustify } from "lucide-react";
 
   interface SidebarProps {
     activeTab: string;
     setActiveTab: (tab: string) => void;
     onLogout: () => void;
+    onToggleSidebar?: () => void;
   }
 
-  const Sidebar = ({ activeTab, setActiveTab, onLogout }: SidebarProps) => {
+  const Sidebar = ({ activeTab, setActiveTab, onLogout, onToggleSidebar }: SidebarProps) => {
     const menuItems = [
       {
         id: "overview",
@@ -29,8 +31,13 @@
 
     return (
       <div className="bg-white w-64 h-screen shadow-sm border-r flex flex-col">
-        <div className="p-4 border-b">
+        <div className="p-4 border-b flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-800">AgendaPro </h2>
+          <div className="">
+            <button className="border-[1px] px-2 py-1 rounded-md border-gray-300 lg:hidden" onClick={onToggleSidebar}>
+              <AlignJustify size={16} color="black" width={14} height={18} strokeWidth={2}/>
+            </button>
+          </div>
         </div>
         
         <nav className="flex-1 py-4">

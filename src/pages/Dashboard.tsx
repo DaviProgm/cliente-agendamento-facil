@@ -9,6 +9,7 @@ import AppointmentList from "@/components/AppointmentList";
 import AddClientModal from "@/components/AddClientModal";
 import AddAppointmentModal from "@/components/AddAppointmentModal";
 import api from "@/instance/api"; // sua instância axios configurada
+import { set } from "date-fns";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -149,6 +150,7 @@ const Dashboard = () => {
       </div>
     );
   }
+  console.log(isSidebarOpen)
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -157,6 +159,7 @@ const Dashboard = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           onLogout={handleLogout}
+          onToggleSidebar={() => setIsSidebarOpen(false)}
         />
       </div>
 
@@ -174,6 +177,7 @@ const Dashboard = () => {
                 setIsSidebarOpen(false);
               }}
               onLogout={handleLogout}
+              onToggleSidebar={() => setIsSidebarOpen(false)}
             />
           </div>
         </div>
