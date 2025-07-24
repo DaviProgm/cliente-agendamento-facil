@@ -7,7 +7,9 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
-import PrivateRoute from "@/components/PrivateRoute"; // ✅ import do componente de rota protegida
+import PrivateRoute from "@/components/DashboardCreditor/PrivateRoute"; // ✅ import do componente de rota protegida
+import Register from "./pages/register";
+import DashboardCustumer from "./pages/DashboardCustumer";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,15 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register/>} />
+          <Route
+            path="/dashboard-cliente"
+            element={
+              <PrivateRoute>
+                <DashboardCustumer/>
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={

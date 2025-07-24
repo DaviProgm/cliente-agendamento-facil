@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Users, UserPlus, Menu } from "lucide-react";
-import Sidebar from "@/components/Sidebar";
-import ClientList from "@/components/ClientList";
-import AppointmentList from "@/components/AppointmentList";
-import AddClientModal from "@/components/AddClientModal";
-import AddAppointmentModal from "@/components/AddAppointmentModal";
+import Sidebar from "@/components/DashboardCreditor/Sidebar";
+import ClientList from "@/components/DashboardCreditor/ClientList";
+import AppointmentList from "@/components/DashboardCreditor/AppointmentList";
+import AddClientModal from "@/components/DashboardCreditor/AddClientModal";
+import AddAppointmentModal from "@/components/DashboardCreditor/AddAppointmentModal";
 import api from "@/instance/api"; // sua instância axios configurada
 import { set } from "date-fns";
+import CreditorProfile from "@/components/DashboardCreditor/CreditorProfile";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -41,7 +42,7 @@ const Dashboard = () => {
         const agendamentos = response.data;
 
         const hoje = new Date();
-        const hojeStr = hoje.toISOString().split("T")[0]; // 'YYYY-MM-DD'
+        const hojeStr = hoje.toISOString().split("T")[0];
         const mesAtual = hoje.getMonth();
         const anoAtual = hoje.getFullYear();
 
@@ -60,7 +61,7 @@ const Dashboard = () => {
         setAgendamentosMes(countMes);
       } catch (error: any) {
         console.error("Erro ao buscar agendamentos:", error);
-        // Se der 401, o interceptor já redireciona, mas aqui evita problema no uso
+     
         if (error?.response?.status === 401) {
           navigate("/login");
         }
@@ -104,6 +105,7 @@ const Dashboard = () => {
       default:
         return (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
@@ -138,7 +140,9 @@ const Dashboard = () => {
                 </p>
               </CardContent>
             </Card>
+            <CreditorProfile providerId={parseInt(localStorage.getItem("userId") || "0")} />
           </div>
+          
         );
     }
   };

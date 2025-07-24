@@ -42,15 +42,23 @@ const Login = () => {
       const { token, user } = response.data;
 
       localStorage.setItem("token", token);
+      localStorage.setItem("userId", user.id); 
       localStorage.setItem("userEmail", user.email);
-
+      
+      localStorage.setItem("userRole", user.role);
       toast({
         title: "Login realizado com sucesso!",
         description: `Bem-vindo, ${user.email}!`,
       });
 
       setTimeout(() => {
-        navigate("/dashboard");
+        if (user.role === "customer") {
+          navigate("/dashboard-cliente"); // rota para cliente
+        } else if (user.role === "provider") {
+          navigate("/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       }, 100);
     } catch (error) {
       console.error("Erro no login:", error);

@@ -1,6 +1,6 @@
 // src/components/AddAppointmentModal.tsx
 import React, { useState, useEffect } from "react";
-import api from "../instance/api"; // axios configurado
+import api from "../../instance/api"; // axios configurado
 import { toast } from "sonner";
 
 const AddAppointmentModal = ({ isOpen, onClose, onCreated }) => {

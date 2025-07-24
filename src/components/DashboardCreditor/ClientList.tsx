@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import ClientDetailsModal from "@/components/ClientDetailsModal";
+import ClientDetailsModal from "@/components/DashboardCreditor/ClientDetailsModal";
 import api from "@/instance/api";
 import { toast } from "@/hooks/use-toast";
 

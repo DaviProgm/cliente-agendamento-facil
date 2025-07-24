@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import api from "../instance/api";
+import api from "../../instance/api";
 import { toast } from "sonner";
 
 const EditAppointmentModal = ({

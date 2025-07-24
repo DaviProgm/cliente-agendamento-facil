@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AppointmentList from "./AppointmentList";
-import CreateAppointmentModal from "../components/AddAppointmentModal";
+import CreateAppointmentModal from "../DashboardCreditor/AddAppointmentModal";
 
 const AppointmentsPage: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);

@@ -4,11 +4,11 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Users, UserPlus, Menu } from "lucide-react";
-import Sidebar from "@/components/Sidebar";
-import ClientList from "@/components/ClientList";
-import AppointmentList from "@/components/AppointmentList";
-import AddClientModal from "@/components/AddClientModal";
-import AddAppointmentModal from "@/components/AddAppointmentModal";
+import Sidebar from "@/components/DashboardCreditor/Sidebar";
+import ClientList from "@/components/DashboardCreditor/ClientList";
+import AppointmentList from "@/components/DashboardCreditor/AppointmentList";
+import AddClientModal from "@/components/DashboardCreditor/AddClientModal";
+import AddAppointmentModal from "@/components/DashboardCreditor/AddAppointmentModal";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
