@@ -42,9 +42,9 @@ const Login = () => {
       const { token, user } = response.data;
 
       localStorage.setItem("token", token);
-      localStorage.setItem("userId", user.id); 
+      localStorage.setItem("userId", user.id);
       localStorage.setItem("userEmail", user.email);
-      
+
       localStorage.setItem("userRole", user.role);
       toast({
         title: "Login realizado com sucesso!",
@@ -112,8 +112,18 @@ const Login = () => {
             </Button>
           </form>
         </CardContent>
+        <div className=" flex items-center justify-center text-center">
+          <span className="text-sm text-gray-600">Não tem uma conta?</span>
+          <a
+            href="/register"
+            className="ml-2 text-sm font-medium text-blue-600 hover:underline"
+          >
+            Cadastre-se!
+          </a>
+        </div>
       </Card>
     </div>
+
   );
 };
 

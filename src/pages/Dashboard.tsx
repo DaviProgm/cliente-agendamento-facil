@@ -24,7 +24,6 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
-  // Verifica token e controla loading inicial
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -34,7 +33,6 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  // Busca agendamentos
   useEffect(() => {
     const fetchAgendamentos = async () => {
       try {
@@ -71,7 +69,6 @@ const Dashboard = () => {
     fetchAgendamentos();
   }, [navigate]);
 
-  // Opcional: Buscar total de clientes (ajuste se tiver API)
   useEffect(() => {
     const fetchClientes = async () => {
       try {

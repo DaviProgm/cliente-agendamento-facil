@@ -1,6 +1,6 @@
 import api from "@/instance/api";
 import { useState } from "react";
-
+import { toast } from 'react-toastify';
 export default function Register() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -16,13 +16,16 @@ export default function Register() {
                 password,
                 role,
             })
-            alert("Cadastro realizado com sucesso!");
+            toast.success("Cadastro realizado com sucesso!");
         } catch (error) {
            console.error("Erro ao cadastrar:", error);
-              alert(`Erro ao cadastrar: ${error.response?.data?.message || error.message}`); 
+              toast.error(`Erro ao cadastrar: ${error.response?.data?.message || error.message}`); 
         }
     };
-
+    if (role === "cliente") {
+       return  toast.error("O Dashboard para clientes ainda está em desenvolvimento.");
+            
+    }
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
             <h1 className="text-2xl font-bold mb-6">Cadastro</h1>
@@ -76,7 +79,7 @@ export default function Register() {
                 </div>
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
+                    className="w-full bg-[#0F172A] text-white py-2 rounded transition-colors hover:bg-[#1e293b]"
                 >
                     Cadastrar
                 </button>

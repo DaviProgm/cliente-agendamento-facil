@@ -22,7 +22,6 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
-  // Apenas controla o loading inicial
   useEffect(() => {
     setIsLoading(false);
   }, []);
