@@ -6,11 +6,11 @@ export default function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState("");
-
-    const handleSubmit = async  (e: React.FormEvent) => {
+    
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await api.post("/users/register",{
+            const response = await api.post("/users/register", {
                 name,
                 email,
                 password,
@@ -18,13 +18,18 @@ export default function Register() {
             })
             toast.success("Cadastro realizado com sucesso!");
         } catch (error) {
-           console.error("Erro ao cadastrar:", error);
-              toast.error(`Erro ao cadastrar: ${error.response?.data?.message || error.message}`); 
+            console.error("Erro ao cadastrar:", error);
+            toast.error(`Erro ao cadastrar: ${error.response?.data?.message || error.message}`);
         }
     };
     if (role === "cliente") {
-       return  toast.error("O Dashboard para clientes ainda está em desenvolvimento.");
-            
+        toast.error("O Dashboard para clientes ainda está em desenvolvimento.");
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+        return;
+         
+         
     }
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
