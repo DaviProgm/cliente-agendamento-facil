@@ -12,6 +12,7 @@ import Register from "./pages/register";
 import DashboardCustumer from "./pages/DashboardCustumer";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import HomePage from "./pages/homePage";
 
 const queryClient = new QueryClient();
 
@@ -35,7 +36,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
@@ -56,6 +57,7 @@ const App = () => (
           />
           <Route path="*" element={<NotFound />} />
         </Routes>
+
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

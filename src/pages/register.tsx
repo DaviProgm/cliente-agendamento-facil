@@ -6,31 +6,37 @@ export default function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState("");
-    
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const cleanRole = role.trim().toLowerCase();
+
+        console.log("Role limpo:", `"${cleanRole}"`);
         try {
             const response = await api.post("/users/register", {
                 name,
                 email,
                 password,
-                role,
-            })
-            toast.success("Cadastro realizado com sucesso!");
-        } catch (error) {
-            console.error("Erro ao cadastrar:", error);
+                role: cleanRole,
+            });
+
+            if (role === "cliente") {
+                toast.error("O Dashboard para clientes ainda está em desenvolvimento.", {
+                    onClose: () => {
+                        window.location.reload();
+                    },
+                    autoClose: 3000,
+                });
+            } else {
+                toast.success("Cadastro realizado com sucesso!");
+                // Aqui pode redirecionar ou limpar campos
+            }
+        } catch (error: any) {
+            console.error("Erro ao cadastrar:", error.response?.data || error.message);
             toast.error(`Erro ao cadastrar: ${error.response?.data?.message || error.message}`);
         }
     };
-    if (role === "cliente") {
-        toast.error("O Dashboard para clientes ainda está em desenvolvimento.");
-        setTimeout(() => {
-            window.location.reload();
-        }, 1500);
-        return;
-         
-         
-    }
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
             <h1 className="text-2xl font-bold mb-6">Cadastro</h1>
@@ -77,9 +83,8 @@ export default function Register() {
                         onChange={e => setRole(e.target.value)}
                         required
                     >
-                        <option value="" disabled>Selecione o cargo</option>
-                        <option value="prestador">Prestador</option>
-                        <option value="cliente">Cliente</option>
+                        <option value="customer">Cliente</option>
+                        <option value="creditor">Prestador</option>
                     </select>
                 </div>
                 <button

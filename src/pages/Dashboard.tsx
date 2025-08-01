@@ -11,6 +11,7 @@ import AddAppointmentModal from "@/components/DashboardCreditor/AddAppointmentMo
 import api from "@/instance/api"; // sua instância axios configurada
 import { set } from "date-fns";
 import CreditorProfile from "@/components/DashboardCreditor/CreditorProfile";
+import { parseISO, getMonth, getYear } from 'date-fns';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -21,7 +22,6 @@ const Dashboard = () => {
   const [agendamentosMes, setAgendamentosMes] = useState(0);
   const [totalClientes, setTotalClientes] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,41 +33,38 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    const fetchAgendamentos = async () => {
-      try {
-        const response = await api.get("/agendamentos");
-        const agendamentos = response.data;
+ useEffect(() => {
+  const fetchAgendamentos = async () => {
+    try {
+      const response = await api.get("/agendamentos");
+      const agendamentos = response.data;
 
-        const hoje = new Date();
-        const hojeStr = hoje.toISOString().split("T")[0];
-        const mesAtual = hoje.getMonth();
-        const anoAtual = hoje.getFullYear();
+      const hoje = new Date();
+      const hojeStr = hoje.toISOString().split("T")[0];
+      const mesAtual = hoje.getMonth();
+      const anoAtual = hoje.getFullYear();
 
-        const countHoje = agendamentos.filter(
-          (ag: any) => ag.date === hojeStr
-        ).length;
+      const countHoje = agendamentos.filter(
+        (ag: any) => ag.date === hojeStr
+      ).length;
 
-        const countMes = agendamentos.filter((ag: any) => {
-          const dataAg = new Date(ag.date);
-          return (
-            dataAg.getMonth() === mesAtual && dataAg.getFullYear() === anoAtual
-          );
-        }).length;
+      const countMes = agendamentos.filter((ag: any) => {
+        const dataAg = parseISO(ag.date);
+        return getMonth(dataAg) === mesAtual && getYear(dataAg) === anoAtual;
+      }).length;
 
-        setAgendamentosHoje(countHoje);
-        setAgendamentosMes(countMes);
-      } catch (error: any) {
-        console.error("Erro ao buscar agendamentos:", error);
-     
-        if (error?.response?.status === 401) {
-          navigate("/login");
-        }
+      setAgendamentosHoje(countHoje);
+      setAgendamentosMes(countMes);
+    } catch (error: any) {
+      console.error("Erro ao buscar agendamentos:", error);
+      if (error?.response?.status === 401) {
+        navigate("/login");
       }
-    };
+    }
+  };
 
-    fetchAgendamentos();
-  }, [navigate]);
+  fetchAgendamentos();
+}, [navigate]);
 
   useEffect(() => {
     const fetchClientes = async () => {
@@ -102,7 +99,7 @@ const Dashboard = () => {
       default:
         return (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
@@ -139,7 +136,7 @@ const Dashboard = () => {
             </Card>
             <CreditorProfile providerId={parseInt(localStorage.getItem("userId") || "0")} />
           </div>
-          
+
         );
     }
   };
@@ -257,7 +254,7 @@ const Dashboard = () => {
       <AddAppointmentModal
         isOpen={isAppointmentModalOpen}
         onClose={() => setIsAppointmentModalOpen(false)}
-        onCreated={() => {}}
+        onCreated={() => { }}
       />
     </div>
   );
