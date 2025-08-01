@@ -25,7 +25,7 @@ const EditAppointmentModal = ({
       setFormData({
         name: name || "",
         service: service || "",
-        date: date?.split("T")[0] || "", // força formato YYYY-MM-DD
+        date: date?.split("T")[0] || "",
         time: time || "",
         observations: observations || "",
       });
@@ -43,7 +43,7 @@ const EditAppointmentModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!appointment || !appointment.id) {
+    if (!appointment?.id) {
       toast.error("Agendamento inválido para atualização.");
       return;
     }
@@ -59,11 +59,9 @@ const EditAppointmentModal = ({
     };
 
     try {
-      console.log("Atualizando agendamento ID:", appointment.id, payload);
       await api.put(`/agendamentos/${appointment.id}`, payload);
-
       toast.success("Agendamento atualizado com sucesso!");
-      if (typeof onUpdated === "function") onUpdated();
+      onUpdated?.();
       onClose();
     } catch (error) {
       console.error("Erro ao atualizar agendamento:", error.response?.data || error.message);
@@ -76,14 +74,14 @@ const EditAppointmentModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="modal-content bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+      <div className="bg-white w-full max-w-md mx-4 p-6 rounded-2xl shadow-lg transition-all">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Editar Agendamento</h2>
+          <h2 className="text-xl font-semibold text-[#8B5CF6]">Editar Agendamento</h2>
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="text-sm text-red-500"
+            className="text-sm text-red-500 hover:underline"
           >
             Fechar
           </button>
@@ -94,57 +92,48 @@ const EditAppointmentModal = ({
             type="text"
             placeholder="Nome do cliente"
             value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-[#8B5CF6]/30 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded px-3 py-2 transition"
           />
 
           <input
             type="text"
             placeholder="Serviço"
             value={formData.service}
-            onChange={(e) =>
-              setFormData({ ...formData, service: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, service: e.target.value })}
             required
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-[#8B5CF6]/30 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded px-3 py-2 transition"
           />
 
           <input
             type="date"
             value={formData.date}
-            onChange={(e) =>
-              setFormData({ ...formData, date: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             required
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-[#8B5CF6]/30 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded px-3 py-2 transition"
           />
 
           <input
             type="time"
             value={formData.time}
-            onChange={(e) =>
-              setFormData({ ...formData, time: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, time: e.target.value })}
             required
-            className="w-full border rounded px-3 py-2"
+            className="w-full border border-[#8B5CF6]/30 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded px-3 py-2 transition"
           />
 
           <textarea
             placeholder="Observações"
             value={formData.observations}
-            onChange={(e) =>
-              setFormData({ ...formData, observations: e.target.value })
-            }
-            className="w-full border rounded px-3 py-2"
+            onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+            className="w-full border border-[#8B5CF6]/30 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded px-3 py-2 transition resize-none"
+            rows={3}
           />
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+            className="w-full bg-white text-[#8B5CF6] border border-[#8B5CF6] hover:bg-gray-100 py-2 rounded font-medium transition"
           >
             {isSubmitting ? "Atualizando..." : "Atualizar Agendamento"}
           </button>

@@ -1,9 +1,14 @@
-// src/components/AddAppointmentModal.tsx
 import React, { useState, useEffect } from "react";
-import api from "../../instance/api"; // axios configurado
+import api from "../../instance/api";
 import { toast } from "sonner";
 
-const AddAppointmentModal = ({ isOpen, onClose, onCreated }) => {
+interface AddAppointmentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onCreated?: (appointment: any) => void;
+}
+
+const AddAppointmentModal = ({ isOpen, onClose, onCreated }: AddAppointmentModalProps) => {
   const [clients, setClients] = useState([]);
   const [formData, setFormData] = useState({
     clientId: 0,
@@ -24,24 +29,23 @@ const AddAppointmentModal = ({ isOpen, onClose, onCreated }) => {
 
   if (!isOpen) return null;
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === "clientId" ? Number(value) : value
+      [name]: name === "clientId" ? Number(value) : value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.clientId) {
-      toast.error("Selecione um cliente para o agendamento.");
+      toast.error("Selecione um cliente.");
       return;
     }
 
     setIsSubmitting(true);
-    console.log("Enviando ao backend:", formData);
 
     try {
       const response = await api.post("/agendamentos", formData, {
@@ -49,14 +53,10 @@ const AddAppointmentModal = ({ isOpen, onClose, onCreated }) => {
       });
 
       toast.success("Agendamento criado com sucesso!");
-
-      // Passa apenas o schedule para onCreated
       onCreated?.(response.data.schedule);
-
       setFormData({ clientId: 0, service: "", date: "", time: "", observations: "" });
       onClose();
-    } catch (error) {
-      console.error("Erro na requisição:", error.response?.data || error.message);
+    } catch (error: any) {
       toast.error(
         "Erro ao criar agendamento: " +
         (error.response?.data?.message || error.message)
@@ -67,71 +67,104 @@ const AddAppointmentModal = ({ isOpen, onClose, onCreated }) => {
   };
 
   return (
-    <div className="modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="modal-content bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-        <h2 className="text-lg font-semibold mb-4">Criar Agendamento</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-xl border border-[#8B5CF6] p-6">
+        <h2 className="text-xl font-semibold text-[#8B5CF6] mb-4">Novo Agendamento</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <select
-            name="clientId"
-            value={formData.clientId}
-            onChange={handleChange}
-            required
-            className="w-full border rounded px-3 py-2"
-          >
-            <option value={0} disabled>Selecione um cliente</option>
-            {clients.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({c.email})
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">
+              Cliente *
+            </label>
+            <select
+              name="clientId"
+              value={formData.clientId}
+              onChange={handleChange}
+              required
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+            >
+              <option value={0} disabled>Selecione um cliente</option>
+              {clients.map((c: any) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} ({c.email})
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <input
-            name="service"
-            value={formData.service}
-            onChange={handleChange}
-            placeholder="Serviço"
-            required
-            className="w-full border rounded px-3 py-2"
-          />
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            required
-            className="w-full border rounded px-3 py-2"
-          />
-          <input
-            type="time"
-            name="time"
-            value={formData.time}
-            onChange={handleChange}
-            required
-            className="w-full border rounded px-3 py-2"
-          />
-          <textarea
-            name="observations"
-            value={formData.observations}
-            onChange={handleChange}
-            placeholder="Observações"
-            className="w-full border rounded px-3 py-2"
-          />
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
-          >
-            {isSubmitting ? "Salvando..." : "Salvar"}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="w-full mt-2 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 rounded"
-          >
-            Cancelar
-          </button>
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">
+              Serviço *
+            </label>
+            <input
+              type="text"
+              name="service"
+              value={formData.service}
+              onChange={handleChange}
+              required
+              placeholder="Ex: Consulta, Corte, Reunião"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+            />
+          </div>
+
+          <div className="flex space-x-2">
+            <div className="flex-1">
+              <label className="text-sm font-medium text-gray-700 block mb-1">
+                Data *
+              </label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-sm font-medium text-gray-700 block mb-1">
+                Hora *
+              </label>
+              <input
+                type="time"
+                name="time"
+                value={formData.time}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">
+              Observações
+            </label>
+            <textarea
+              name="observations"
+              value={formData.observations}
+              onChange={handleChange}
+              placeholder="Ex: Levar documentos, preferir horários pela manhã..."
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2 pt-2">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-[#8B5CF6] hover:bg-[#7a4fe6] text-white py-2 rounded-lg transition-all"
+            >
+              {isSubmitting ? "Salvando..." : "Salvar Agendamento"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg"
+            >
+              Cancelar
+            </button>
+          </div>
         </form>
       </div>
     </div>

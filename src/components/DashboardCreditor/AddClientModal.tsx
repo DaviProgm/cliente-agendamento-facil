@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -12,12 +11,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { createClient } from "@/services/clientService"; // ✅ Integração com API
+import { createClient } from "@/services/clientService";
 
 interface AddClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreated?: () => void; // ✅ Para atualizar a lista de clientes se quiser
+  onCreated?: () => void;
 }
 
 const AddClientModal = ({ isOpen, onClose, onCreated }: AddClientModalProps) => {
@@ -27,7 +26,6 @@ const AddClientModal = ({ isOpen, onClose, onCreated }: AddClientModalProps) => 
     phone: "",
     address: "",
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
@@ -46,19 +44,12 @@ const AddClientModal = ({ isOpen, onClose, onCreated }: AddClientModalProps) => 
 
       toast({
         title: "Cliente adicionado com sucesso!",
-        description: `${formData.name} foi adicionado à lista de clientes.`,
+        description: `${formData.name} foi adicionado à lista.`,
       });
 
-      // Resetar formulário
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        address: "",
-      });
-
+      setFormData({ name: "", email: "", phone: "", address: "" });
       onClose();
-      onCreated?.(); // Atualiza a lista, se passado
+      onCreated?.();
     } catch (error: any) {
       console.error("Erro ao criar cliente:", error);
       toast({
@@ -74,15 +65,17 @@ const AddClientModal = ({ isOpen, onClose, onCreated }: AddClientModalProps) => 
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="max-w-md rounded-2xl shadow-xl border border-[#8B5CF6]">
         <AlertDialogHeader>
-          <AlertDialogTitle>Adicionar Novo Cliente</AlertDialogTitle>
-          <AlertDialogDescription>
-            Preencha as informações do cliente abaixo.
+          <AlertDialogTitle className="text-[#8B5CF6] text-xl font-bold">
+            Adicionar Novo Cliente
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm text-gray-600">
+            Preencha os dados do cliente abaixo
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nome *</Label>
             <Input
@@ -91,6 +84,7 @@ const AddClientModal = ({ isOpen, onClose, onCreated }: AddClientModalProps) => 
               onChange={(e) => handleInputChange("name", e.target.value)}
               placeholder="Nome completo"
               required
+              className="border-[#8B5CF6]/40 focus-visible:ring-[#8B5CF6]"
             />
           </div>
 
@@ -103,6 +97,7 @@ const AddClientModal = ({ isOpen, onClose, onCreated }: AddClientModalProps) => 
               onChange={(e) => handleInputChange("email", e.target.value)}
               placeholder="email@exemplo.com"
               required
+              className="border-[#8B5CF6]/40 focus-visible:ring-[#8B5CF6]"
             />
           </div>
 
@@ -114,6 +109,7 @@ const AddClientModal = ({ isOpen, onClose, onCreated }: AddClientModalProps) => 
               onChange={(e) => handleInputChange("phone", e.target.value)}
               placeholder="(11) 99999-9999"
               required
+              className="border-[#8B5CF6]/40 focus-visible:ring-[#8B5CF6]"
             />
           </div>
 
@@ -124,15 +120,20 @@ const AddClientModal = ({ isOpen, onClose, onCreated }: AddClientModalProps) => 
               value={formData.address}
               onChange={(e) => handleInputChange("address", e.target.value)}
               placeholder="Endereço completo"
+              className="border-[#8B5CF6]/40 focus-visible:ring-[#8B5CF6]"
             />
           </div>
         </form>
 
-        <AlertDialogFooter>
+        <AlertDialogFooter className="mt-6">
           <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="bg-[#8B5CF6] text-white hover:bg-[#7a4fe6]"
+          >
             {isSubmitting ? "Salvando..." : "Salvar Cliente"}
           </Button>
         </AlertDialogFooter>

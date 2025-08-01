@@ -8,8 +8,7 @@ import ClientList from "@/components/DashboardCreditor/ClientList";
 import AppointmentList from "@/components/DashboardCreditor/AppointmentList";
 import AddClientModal from "@/components/DashboardCreditor/AddClientModal";
 import AddAppointmentModal from "@/components/DashboardCreditor/AddAppointmentModal";
-import api from "@/instance/api"; // sua instância axios configurada
-import { set } from "date-fns";
+import api from "@/instance/api";
 import CreditorProfile from "@/components/DashboardCreditor/CreditorProfile";
 import { parseISO, getMonth, getYear } from 'date-fns';
 
@@ -33,38 +32,38 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
- useEffect(() => {
-  const fetchAgendamentos = async () => {
-    try {
-      const response = await api.get("/agendamentos");
-      const agendamentos = response.data;
+  useEffect(() => {
+    const fetchAgendamentos = async () => {
+      try {
+        const response = await api.get("/agendamentos");
+        const agendamentos = response.data;
 
-      const hoje = new Date();
-      const hojeStr = hoje.toISOString().split("T")[0];
-      const mesAtual = hoje.getMonth();
-      const anoAtual = hoje.getFullYear();
+        const hoje = new Date();
+        const hojeStr = hoje.toISOString().split("T")[0];
+        const mesAtual = hoje.getMonth();
+        const anoAtual = hoje.getFullYear();
 
-      const countHoje = agendamentos.filter(
-        (ag: any) => ag.date === hojeStr
-      ).length;
+        const countHoje = agendamentos.filter(
+          (ag: any) => ag.date === hojeStr
+        ).length;
 
-      const countMes = agendamentos.filter((ag: any) => {
-        const dataAg = parseISO(ag.date);
-        return getMonth(dataAg) === mesAtual && getYear(dataAg) === anoAtual;
-      }).length;
+        const countMes = agendamentos.filter((ag: any) => {
+          const dataAg = parseISO(ag.date);
+          return getMonth(dataAg) === mesAtual && getYear(dataAg) === anoAtual;
+        }).length;
 
-      setAgendamentosHoje(countHoje);
-      setAgendamentosMes(countMes);
-    } catch (error: any) {
-      console.error("Erro ao buscar agendamentos:", error);
-      if (error?.response?.status === 401) {
-        navigate("/login");
+        setAgendamentosHoje(countHoje);
+        setAgendamentosMes(countMes);
+      } catch (error: any) {
+        console.error("Erro ao buscar agendamentos:", error);
+        if (error?.response?.status === 401) {
+          navigate("/login");
+        }
       }
-    }
-  };
+    };
 
-  fetchAgendamentos();
-}, [navigate]);
+    fetchAgendamentos();
+  }, [navigate]);
 
   useEffect(() => {
     const fetchClientes = async () => {
@@ -98,45 +97,42 @@ const Dashboard = () => {
         );
       default:
         return (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <Card className="bg-white text-gray-900 shadow-xl border border-gray-200">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-4 w-4 text-[#8B5CF6]" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalClientes || 0}</div>
-                <p className="text-xs text-muted-foreground">+2 novos este mês</p>
+                <p className="text-xs text-gray-500">+2 novos este mês</p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card className="bg-white text-gray-900 shadow-xl border border-gray-200">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Agendamentos Hoje</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Calendar className="h-4 w-4 text-[#8B5CF6]" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{agendamentosHoje}</div>
-                <p className="text-xs text-muted-foreground">pendentes</p>
+                <p className="text-xs text-gray-500">pendentes</p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card className="bg-white text-gray-900 shadow-xl border border-gray-200">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Agendamentos Mês</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Calendar className="h-4 w-4 text-[#8B5CF6]" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{agendamentosMes}</div>
-                <p className="text-xs text-muted-foreground">
-                  +12% em relação ao mês anterior
-                </p>
+                <p className="text-xs text-gray-500">+12% em relação ao mês anterior</p>
               </CardContent>
             </Card>
+
             <CreditorProfile providerId={parseInt(localStorage.getItem("userId") || "0")} />
           </div>
-
         );
     }
   };
@@ -148,10 +144,9 @@ const Dashboard = () => {
       </div>
     );
   }
-  console.log(isSidebarOpen)
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-white text-gray-900">
       <div className="hidden lg:block">
         <Sidebar
           activeTab={activeTab}
@@ -182,7 +177,7 @@ const Dashboard = () => {
       )}
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm border-b p-4">
+        <header className="bg-white border-b border-gray-200 shadow-sm p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <Button
@@ -193,7 +188,7 @@ const Dashboard = () => {
               >
                 <Menu className="w-4 h-4" />
               </Button>
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
                 {activeTab === "overview" && "Visão Geral"}
                 {activeTab === "clients" && "Clientes"}
                 {activeTab === "appointments" && "Agendamentos"}
@@ -201,48 +196,22 @@ const Dashboard = () => {
             </div>
             <div className="flex gap-2">
               {activeTab === "clients" && (
-                <Button
-                  onClick={() => setIsClientModalOpen(true)}
-                  size="sm"
-                  className="hidden sm:flex"
-                >
+                <Button onClick={() => setIsClientModalOpen(true)} size="sm" className="hidden sm:flex">
                   <UserPlus className="w-4 h-4 mr-2" />
                   Adicionar Cliente
                 </Button>
               )}
               {activeTab === "appointments" && (
-                <Button
-                  onClick={() => setIsAppointmentModalOpen(true)}
-                  size="sm"
-                  className="hidden sm:flex"
-                >
+                <Button onClick={() => setIsAppointmentModalOpen(true)} size="sm" className="hidden sm:flex">
                   <Calendar className="w-4 h-4 mr-2" />
                   Novo Agendamento
-                </Button>
-              )}
-              {activeTab === "clients" && (
-                <Button
-                  onClick={() => setIsClientModalOpen(true)}
-                  size="sm"
-                  className="sm:hidden"
-                >
-                  <UserPlus className="w-4 h-4" />
-                </Button>
-              )}
-              {activeTab === "appointments" && (
-                <Button
-                  onClick={() => setIsAppointmentModalOpen(true)}
-                  size="sm"
-                  className="sm:hidden"
-                >
-                  <Calendar className="w-4 h-4" />
                 </Button>
               )}
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
           {renderContent()}
         </main>
       </div>
