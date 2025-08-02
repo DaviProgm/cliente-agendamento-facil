@@ -45,70 +45,53 @@ const Dashboard: React.FC = () => {
 
 
   useEffect(() => {
-    const fetchAgendamentos = async () => {
-      try {
-        const response = await api.get("/agendamentos");
-        const agendamentos = response.data;
+  const fetchAgendamentos = async () => {
+    try {
+      const response = await api.get("/agendamentos");
+      const agendamentos = response.data;
 
-        const hoje = new Date();
-        const hojeStr = hoje.toISOString().split("T")[0];
-        const mesAtual = hoje.getMonth();
-        const anoAtual = hoje.getFullYear();
+      const hoje = new Date();
+      const hojeStr = hoje.toISOString().split("T")[0];
+      const mesAtual = hoje.getMonth();
+      const anoAtual = hoje.getFullYear();
 
-        const countHoje = agendamentos.filter(
-          (ag: any) => ag.date === hojeStr
-        ).length;
+      const countHoje = agendamentos.filter((ag: any) => ag.date === hojeStr).length;
+      const countMes = agendamentos.filter((ag: any) => {
+        const dataAg = parseISO(ag.date);
+        return getMonth(dataAg) === mesAtual && getYear(dataAg) === anoAtual;
+      }).length;
 
-        const countMes = agendamentos.filter((ag: any) => {
-          const dataAg = parseISO(ag.date);
-          return getMonth(dataAg) === mesAtual && getYear(dataAg) === anoAtual;
-        }).length;
+      setAgendamentosHoje(countHoje);
+      setAgendamentosMes(countMes);
 
-        setAgendamentosHoje(countHoje);
-        setAgendamentosMes(countMes);
+      if (permission === 'granted') {
+        agendamentos.forEach((ag: any) => {
+          const appointmentDate = parseISO(`${ag.date}T${ag.startTime}`);
+          const now = new Date();
+          const diffMinutes = differenceInMinutes(appointmentDate, now);
 
-        // Schedule notifications
-        if (permission === 'granted') {
-          agendamentos.forEach((ag: any) => {
-            const appointmentDate = parseISO(`${ag.date}T${ag.startTime}`);
-            const now = new Date();
-            const diffMinutes = differenceInMinutes(appointmentDate, now);
-
-            if (diffMinutes > 0 && diffMinutes <= 60) {
-              showNotification('Lembrete de Agendamento', {
-                body: `Você tem um agendamento em ${format(appointmentDate, 'HH:mm')}.`,
-                icon: '/logo.png'
-              });
-            }
-          });
-        }
-
-      } catch (error: any) {
-        console.error("Erro ao buscar agendamentos:", error);
-        if (error?.response?.status === 401) {
-          navigate("/login");
-        }
+          if (diffMinutes > 0 && diffMinutes <= 60) {
+            showNotification('Lembrete de Agendamento', {
+              body: `Você tem um agendamento em ${format(appointmentDate, 'HH:mm')}.`,
+              icon: '/logo.png'
+            });
+          }
+        });
       }
-    };
-    useEffect(() => {
-      console.log("🔍 Entrou no useEffect de autenticação");
 
-      const token = localStorage.getItem("token");
-      console.log("🔐 Token encontrado:", token);
-
-      if (!token) {
-        console.log("⚠️ Sem token, redirecionando para login");
+    } catch (error: any) {
+      console.error("Erro ao buscar agendamentos:", error);
+      if (error?.response?.status === 401) {
         navigate("/login");
-      } else {
-        setIsLoading(false);
       }
-    }, [navigate]);
+    }
+  };
 
-    fetchAgendamentos();
-    const interval = setInterval(fetchAgendamentos, 60000); // Check every minute
+  fetchAgendamentos();
+  const interval = setInterval(fetchAgendamentos, 60000);
 
-    return () => clearInterval(interval);
-  }, [navigate, permission, showNotification]);
+  return () => clearInterval(interval);
+}, [navigate, permission, showNotification]);
 
   useEffect(() => {
     const fetchClientes = async () => {
