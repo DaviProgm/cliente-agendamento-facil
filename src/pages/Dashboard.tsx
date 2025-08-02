@@ -176,7 +176,13 @@ const Dashboard: React.FC = () => {
       </div>
     );
   }
-
+if (!providerId) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p>Usuario não autenticado .</p>
+      </div>
+    );
+}
   return (
     <div className="flex h-screen bg-white text-gray-900">
       <div className="hidden lg:block">
