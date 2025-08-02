@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import { parseISO, getMonth, getYear, differenceInMinutes, format } from 'date-f
 import { useNotifications } from "@/hooks/useNotifications";
 import { requestForToken, onMessageListener } from "@/firebase";
 
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
@@ -40,7 +40,7 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  
+
   useEffect(() => {
     const fetchAgendamentos = async () => {
       try {
@@ -87,19 +87,7 @@ const Dashboard = () => {
         }
       }
     };
-    useEffect(() => {
-      console.log("🔍 Entrou no useEffect de autenticação");
 
-      const token = localStorage.getItem("token");
-      console.log("🔐 Token encontrado:", token);
-
-      if (!token) {
-        console.log("⚠️ Sem token, redirecionando para login");
-        navigate("/login");
-      } else {
-        setIsLoading(false);
-      }
-    }, [navigate]);
 
     fetchAgendamentos();
     const interval = setInterval(fetchAgendamentos, 60000); // Check every minute
