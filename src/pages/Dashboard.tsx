@@ -25,6 +25,11 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { permission, requestPermission, showNotification } = useNotifications();
+  console.log("✅ Dashboard carregando...");
+
+  console.log("📱 Plataforma:", navigator.userAgent);
+  console.log("🔐 Token:", localStorage.getItem("token"));
+  console.log("🔔 Permissão de notificações:", Notification.permission);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
