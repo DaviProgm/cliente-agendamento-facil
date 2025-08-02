@@ -25,6 +25,9 @@ const Dashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { permission, requestPermission, showNotification } = useNotifications();
+  const storedUserId = localStorage.getItem("userId");
+  const providerId = storedUserId && !isNaN(parseInt(storedUserId)) ? parseInt(storedUserId) : null;
+
   console.log("✅ Dashboard carregando...");
 
   console.log("📱 Plataforma:", navigator.userAgent);
@@ -87,7 +90,19 @@ const Dashboard: React.FC = () => {
         }
       }
     };
+    useEffect(() => {
+      console.log("🔍 Entrou no useEffect de autenticação");
 
+      const token = localStorage.getItem("token");
+      console.log("🔐 Token encontrado:", token);
+
+      if (!token) {
+        console.log("⚠️ Sem token, redirecionando para login");
+        navigate("/login");
+      } else {
+        setIsLoading(false);
+      }
+    }, [navigate]);
 
     fetchAgendamentos();
     const interval = setInterval(fetchAgendamentos, 60000); // Check every minute
@@ -157,7 +172,6 @@ const Dashboard: React.FC = () => {
                 <p className="text-xs text-gray-500">pendentes</p>
               </CardContent>
             </Card>
-
             <Card className="bg-white text-gray-900 shadow-xl border border-gray-200">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Agendamentos Mês</CardTitle>
@@ -169,6 +183,7 @@ const Dashboard: React.FC = () => {
               </CardContent>
             </Card>
 
+            {providerId && <CreditorProfile providerId={providerId} />}
             <CreditorProfile providerId={parseInt(localStorage.getItem("userId") || "0")} />
           </div>
         );
