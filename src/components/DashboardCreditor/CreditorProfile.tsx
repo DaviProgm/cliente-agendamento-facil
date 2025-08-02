@@ -7,6 +7,7 @@ import { format } from "date-fns";
 interface Schedule {
   id: number;
   name: string;
+  service: string;
   date: string;
   time: string;
   observations?: string;
