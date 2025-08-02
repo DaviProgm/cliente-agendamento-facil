@@ -13,7 +13,7 @@ const Hero = () => {
         CLOKTRIX
       </h1>
       <p className="text-xl mt-4 mb-10 max-w-xl text-white/90">
-        Agenda gratuita para organizar seus agendamentos e clientes com facilidade e eficiência.
+       A melhor agenda gratuita para organizar seus agendamentos e clientes com facilidade e eficiência.
       </p>
       <div className="flex gap-4">
         <Button
