@@ -88,7 +88,7 @@ export function DailyCalendar({
             const isPast = new Date(`${format(date, 'yyyy-MM-dd')}T${time}`) < now;
 
             return (
-              <React.Fragment key={time}>
+              <div key={time} className="contents">
                 <div className="text-right text-sm text-gray-500 pr-2 pt-3 font-mono">
                   {time}
                 </div>
@@ -114,7 +114,7 @@ export function DailyCalendar({
                     </div>
                   )}
                 </div>
-              </React.Fragment>
+              </div>
             );
           })}
         </div>

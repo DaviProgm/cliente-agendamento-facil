@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Users, UserPlus, Menu } from "lucide-react";
+import { Calendar, Users, UserPlus, Menu, Bell } from "lucide-react";
 import Sidebar from "@/components/DashboardCreditor/Sidebar";
 import ClientList from "@/components/DashboardCreditor/ClientList";
 import AppointmentList from "@/components/DashboardCreditor/AppointmentList";
@@ -10,7 +10,9 @@ import AddClientModal from "@/components/DashboardCreditor/AddClientModal";
 import AddAppointmentModal from "@/components/DashboardCreditor/AddAppointmentModal";
 import api from "@/instance/api";
 import CreditorProfile from "@/components/DashboardCreditor/CreditorProfile";
-import { parseISO, getMonth, getYear } from 'date-fns';
+import { parseISO, getMonth, getYear, differenceInMinutes, format } from 'date-fns';
+import { useNotifications } from "@/hooks/useNotifications";
+import { requestForToken, onMessageListener } from "@/firebase";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -22,6 +24,7 @@ const Dashboard = () => {
   const [totalClientes, setTotalClientes] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { permission, requestPermission, showNotification } = useNotifications();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -31,6 +34,12 @@ const Dashboard = () => {
       setIsLoading(false);
     }
   }, [navigate]);
+
+  useEffect(() => {
+    if (permission === 'granted') {
+      requestForToken();
+    }
+  }, [permission]);
 
   useEffect(() => {
     const fetchAgendamentos = async () => {
@@ -54,6 +63,23 @@ const Dashboard = () => {
 
         setAgendamentosHoje(countHoje);
         setAgendamentosMes(countMes);
+
+        // Schedule notifications
+        if (permission === 'granted') {
+          agendamentos.forEach((ag: any) => {
+            const appointmentDate = parseISO(`${ag.date}T${ag.startTime}`);
+            const now = new Date();
+            const diffMinutes = differenceInMinutes(appointmentDate, now);
+
+            if (diffMinutes > 0 && diffMinutes <= 60) {
+              showNotification('Lembrete de Agendamento', {
+                body: `Você tem um agendamento em ${format(appointmentDate, 'HH:mm')}.`,
+                icon: '/logo.png'
+              });
+            }
+          });
+        }
+
       } catch (error: any) {
         console.error("Erro ao buscar agendamentos:", error);
         if (error?.response?.status === 401) {
@@ -63,7 +89,10 @@ const Dashboard = () => {
     };
 
     fetchAgendamentos();
-  }, [navigate]);
+    const interval = setInterval(fetchAgendamentos, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, [navigate, permission, showNotification]);
 
   useEffect(() => {
     const fetchClientes = async () => {
@@ -83,6 +112,14 @@ const Dashboard = () => {
     localStorage.removeItem("isAuthenticated");
     navigate("/login");
   };
+
+  useEffect(() => {
+    onMessageListener()
+      .then((payload) => {
+        console.log(payload);
+      })
+      .catch((err) => console.log("failed: ", err));
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -194,7 +231,13 @@ const Dashboard = () => {
                 {activeTab === "appointments" && "Agendamentos"}
               </h1>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              {permission === 'default' && (
+                <Button onClick={requestPermission} size="sm" variant="outline">
+                  <Bell className="w-4 h-4 mr-2" />
+                  Ativar Notificações
+                </Button>
+              )}
               {activeTab === "clients" && (
                 <Button onClick={() => setIsClientModalOpen(true)} size="sm" className="hidden sm:flex">
                   <UserPlus className="w-4 h-4 mr-2" />
