@@ -40,12 +40,7 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    if (permission === 'granted') {
-      requestForToken();
-    }
-  }, [permission]);
-
+  
   useEffect(() => {
     const fetchAgendamentos = async () => {
       try {
