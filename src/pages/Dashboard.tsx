@@ -12,7 +12,7 @@ import api from "@/instance/api";
 import CreditorProfile from "@/components/DashboardCreditor/CreditorProfile";
 import { parseISO, getMonth, getYear, differenceInMinutes, format } from 'date-fns';
 import { useNotifications } from "@/hooks/useNotifications";
-import { requestForToken, onMessageListener } from "@/firebase";
+import { onMessageListener } from "@/firebase";
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -23,16 +23,10 @@ const Dashboard: React.FC = () => {
   const [agendamentosMes, setAgendamentosMes] = useState(0);
   const [totalClientes, setTotalClientes] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [providerId, setProviderId] = useState<number | null>(null);
+
   const navigate = useNavigate();
   const { permission, requestPermission, showNotification } = useNotifications();
-  const storedUserId = localStorage.getItem("userId");
-  const providerId = storedUserId && !isNaN(parseInt(storedUserId)) ? parseInt(storedUserId) : null;
-
-  console.log("✅ Dashboard carregando...");
-
-  console.log("📱 Plataforma:", navigator.userAgent);
-  console.log("🔐 Token:", localStorage.getItem("token"));
-  console.log("🔔 Permissão de notificações:", Notification.permission);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -41,57 +35,61 @@ const Dashboard: React.FC = () => {
     } else {
       setIsLoading(false);
     }
+
+    const stored = localStorage.getItem("userId");
+    if (stored && !isNaN(parseInt(stored))) {
+      setProviderId(parseInt(stored));
+    }
   }, [navigate]);
 
-
   useEffect(() => {
-  const fetchAgendamentos = async () => {
-    try {
-      const response = await api.get("/agendamentos");
-      const agendamentos = response.data;
+    const fetchAgendamentos = async () => {
+      try {
+        const response = await api.get("/agendamentos");
+        const agendamentos = response.data;
 
-      const hoje = new Date();
-      const hojeStr = hoje.toISOString().split("T")[0];
-      const mesAtual = hoje.getMonth();
-      const anoAtual = hoje.getFullYear();
+        const hoje = new Date();
+        const hojeStr = hoje.toISOString().split("T")[0];
+        const mesAtual = hoje.getMonth();
+        const anoAtual = hoje.getFullYear();
 
-      const countHoje = agendamentos.filter((ag: any) => ag.date === hojeStr).length;
-      const countMes = agendamentos.filter((ag: any) => {
-        const dataAg = parseISO(ag.date);
-        return getMonth(dataAg) === mesAtual && getYear(dataAg) === anoAtual;
-      }).length;
+        const countHoje = agendamentos.filter((ag: any) => ag.date === hojeStr).length;
+        const countMes = agendamentos.filter((ag: any) => {
+          const dataAg = parseISO(ag.date);
+          return getMonth(dataAg) === mesAtual && getYear(dataAg) === anoAtual;
+        }).length;
 
-      setAgendamentosHoje(countHoje);
-      setAgendamentosMes(countMes);
+        setAgendamentosHoje(countHoje);
+        setAgendamentosMes(countMes);
 
-      if (permission === 'granted') {
-        agendamentos.forEach((ag: any) => {
-          const appointmentDate = parseISO(`${ag.date}T${ag.startTime}`);
-          const now = new Date();
-          const diffMinutes = differenceInMinutes(appointmentDate, now);
+        if (permission === 'granted') {
+          agendamentos.forEach((ag: any) => {
+            const appointmentDate = parseISO(`${ag.date}T${ag.startTime}`);
+            const now = new Date();
+            const diffMinutes = differenceInMinutes(appointmentDate, now);
 
-          if (diffMinutes > 0 && diffMinutes <= 60) {
-            showNotification('Lembrete de Agendamento', {
-              body: `Você tem um agendamento em ${format(appointmentDate, 'HH:mm')}.`,
-              icon: '/logo.png'
-            });
-          }
-        });
+            if (diffMinutes > 0 && diffMinutes <= 60) {
+              showNotification('Lembrete de Agendamento', {
+                body: `Você tem um agendamento em ${format(appointmentDate, 'HH:mm')}.`,
+                icon: '/logo.png'
+              });
+            }
+          });
+        }
+
+      } catch (error: any) {
+        console.error("Erro ao buscar agendamentos:", error);
+        if (error?.response?.status === 401) {
+          navigate("/login");
+        }
       }
+    };
 
-    } catch (error: any) {
-      console.error("Erro ao buscar agendamentos:", error);
-      if (error?.response?.status === 401) {
-        navigate("/login");
-      }
-    }
-  };
+    fetchAgendamentos();
+    const interval = setInterval(fetchAgendamentos, 60000);
 
-  fetchAgendamentos();
-  const interval = setInterval(fetchAgendamentos, 60000);
-
-  return () => clearInterval(interval);
-}, [navigate, permission, showNotification]);
+    return () => clearInterval(interval);
+  }, [navigate, permission, showNotification]);
 
   useEffect(() => {
     const fetchClientes = async () => {
@@ -106,18 +104,16 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("isAuthenticated");
+    localStorage.clear();
     navigate("/login");
   };
 
   useEffect(() => {
     onMessageListener()
       .then((payload) => {
-        console.log(payload);
+        console.log("📩 Notificação recebida:", payload);
       })
-      .catch((err) => console.log("failed: ", err));
+      .catch((err) => console.error("❌ Erro no listener de mensagem:", err));
   }, []);
 
   const renderContent = () => {
@@ -155,6 +151,7 @@ const Dashboard: React.FC = () => {
                 <p className="text-xs text-gray-500">pendentes</p>
               </CardContent>
             </Card>
+
             <Card className="bg-white text-gray-900 shadow-xl border border-gray-200">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Agendamentos Mês</CardTitle>
@@ -167,7 +164,6 @@ const Dashboard: React.FC = () => {
             </Card>
 
             {providerId && <CreditorProfile providerId={providerId} />}
-            <CreditorProfile providerId={parseInt(localStorage.getItem("userId") || "0")} />
           </div>
         );
     }
