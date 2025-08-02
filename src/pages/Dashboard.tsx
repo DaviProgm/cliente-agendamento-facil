@@ -87,6 +87,19 @@ const Dashboard = () => {
         }
       }
     };
+    useEffect(() => {
+      console.log("🔍 Entrou no useEffect de autenticação");
+
+      const token = localStorage.getItem("token");
+      console.log("🔐 Token encontrado:", token);
+
+      if (!token) {
+        console.log("⚠️ Sem token, redirecionando para login");
+        navigate("/login");
+      } else {
+        setIsLoading(false);
+      }
+    }, [navigate]);
 
     fetchAgendamentos();
     const interval = setInterval(fetchAgendamentos, 60000); // Check every minute
