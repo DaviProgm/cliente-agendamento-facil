@@ -16,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// 👉 Esta função você irá usar no componente para pedir o token FCM
+// 👉 Esta função você irá usar no componente para pedir o  FCM
 export const requestForToken = async (): Promise<string | null> => {
   console.log("🔄 Tentando obter o token do FCM...");
 
@@ -25,26 +25,35 @@ export const requestForToken = async (): Promise<string | null> => {
     return null;
   }
 
-
   try {
+    console.log("📦 Registrando service worker...");
     const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-    console.log("✅ Service worker registrado.");
+    console.log("✅ Service worker registrado:", registration);
 
     const readyRegistration = await navigator.serviceWorker.ready;
-    console.log("✅ Service Worker pronto. Tentando recuperar token...");
-    console.log("📡 Chamando getToken...");
+    console.log("✅ Service Worker pronto:", readyRegistration);
 
+    const permission = await Notification.requestPermission();
+    console.log("🔐 Permissão de notificação:", permission);
+
+    if (permission !== "granted") {
+      console.warn("🚫 Permissão negada para notificações.");
+      return null;
+    }
+
+    console.log("📡 Chamando getToken...");
     const currentToken = await getToken(messaging, {
       vapidKey: "BHsKE-EA8ZWChk1oAoucj9tgVSiQMUMquz79XynADRaHX0dsn2zOSwgzIkHbPyKA30G5AQ6bQQHmYX0Qds2BOB4",
       serviceWorkerRegistration: readyRegistration,
     });
-    console.log("📦 Token FCM:", currentToken);
+
+    console.log("🎯 Token FCM retornado:", currentToken);
 
     if (currentToken) {
       console.log("✅ Token FCM obtido com sucesso:", currentToken);
       return currentToken;
     } else {
-      console.warn("⚠️ Nenhum token disponível. Verifique permissões.");
+      console.warn("⚠️ Nenhum token disponível.");
       return null;
     }
   } catch (err) {
@@ -52,6 +61,7 @@ export const requestForToken = async (): Promise<string | null> => {
     return null;
   }
 };
+
 
 // 👉 Listener para mensagens recebidas com a aba aberta
 export const onMessageListener = () =>

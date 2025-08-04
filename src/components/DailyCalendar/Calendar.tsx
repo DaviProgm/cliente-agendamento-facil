@@ -93,7 +93,7 @@ export function DailyCalendar({
             const slotKey = `${format(date, 'yyyy-MM-dd')}-${time}`;
 
             return (
-              <React.Fragment key={slotKey}>
+              <div key={slotKey}>
                 <div className="text-right text-sm text-gray-500 pr-2 pt-3 font-mono">
                   {time}
                 </div>
@@ -134,7 +134,8 @@ export function DailyCalendar({
                     </div>
                   )}
                 </div>
-              </React.Fragment>
+              </div>
+
             );
           })}
         </div>
