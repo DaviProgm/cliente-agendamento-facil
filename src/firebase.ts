@@ -1,3 +1,5 @@
+// src/firebase.ts
+
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
@@ -14,20 +16,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-export const requestForToken = async () => {
+// 👉 Esta função você irá usar no componente para pedir o token FCM
+export const requestForToken = async (): Promise<string | null> => {
   console.log("🔄 Tentando obter o token do FCM...");
 
   if (!("serviceWorker" in navigator)) {
     console.error("❌ Service Workers não suportados neste navegador.");
-    return;
+    return null;
   }
 
   try {
-    // Registra o SW explicitamente
     const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
     console.log("✅ Service worker registrado.");
 
-    // Aguarda ele estar realmente pronto
     const readyRegistration = await navigator.serviceWorker.ready;
     console.log("✅ Service Worker pronto. Tentando recuperar token...");
 
@@ -38,15 +39,18 @@ export const requestForToken = async () => {
 
     if (currentToken) {
       console.log("✅ Token FCM obtido com sucesso:", currentToken);
+      return currentToken;
     } else {
       console.warn("⚠️ Nenhum token disponível. Verifique permissões.");
+      return null;
     }
   } catch (err) {
     console.error("❌ Erro ao recuperar token:", err);
-    console.error("💡 Verifique se a chave VAPID está correta e se o service worker está no diretório /public.");
+    return null;
   }
 };
 
+// 👉 Listener para mensagens recebidas com a aba aberta
 export const onMessageListener = () =>
   new Promise((resolve) => {
     onMessage(messaging, (payload) => {
