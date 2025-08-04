@@ -14,6 +14,8 @@ import { parseISO, getMonth, getYear, differenceInMinutes, format } from 'date-f
 import { useNotifications } from "@/hooks/useNotifications";
 import { onMessageListener } from "@/firebase";
 import { requestForToken } from "../firebase"; // ajuste o caminho conforme o local do arquivo
+import { getMessaging, onMessage } from "firebase/messaging";
+import { initializeApp } from "firebase/app";
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -145,13 +147,29 @@ const Dashboard: React.FC = () => {
   };
 
 
-  useEffect(() => {
-    onMessageListener()
-      .then((payload) => {
-        console.log("📩 Notificação recebida:", payload);
-      })
-      .catch((err) => console.error("❌ Erro no listener de mensagem:", err));
-  }, []);
+useEffect(() => {
+  onMessageListener()
+  .then((payload) => {
+    if (
+      typeof payload === "object" &&
+      payload !== null &&
+      "notification" in payload
+    ) {
+      const { title, body } = (payload as any).notification;
+      new Notification(title, {
+        body,
+        icon: "/logo.png",
+      });
+    }
+  })
+  .catch((err) => {
+    console.error("❌ Erro no listener de mensagem:", err);
+  });
+
+
+  // Nenhum unsubscribe é necessário para onMessage
+}, []);
+
 
   const renderContent = () => {
     switch (activeTab) {
