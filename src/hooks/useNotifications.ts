@@ -24,10 +24,14 @@ export const useNotifications = () => {
   }, [isSupported]);
 
   const showNotification = useCallback((title: string, options?: NotificationOptions) => {
-    if (isSupported && permission === 'granted') {
+  if (typeof window !== 'undefined' && 'Notification' in window && permission === 'granted') {
+    try {
       new Notification(title, options);
+    } catch (err) {
+      console.error('Erro ao mostrar notificação:', err);
     }
-  }, [isSupported, permission]);
+  }
+}, [permission]);
 
   return { permission, requestPermission, showNotification, isSupported };
 };
