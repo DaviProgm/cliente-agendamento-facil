@@ -38,7 +38,6 @@ export const requestForToken = async () => {
 
     if (currentToken) {
       console.log("✅ Token FCM obtido com sucesso:", currentToken);
-      alert("✅ Token obtido com sucesso! Veja o console.");
     } else {
       console.warn("⚠️ Nenhum token disponível. Verifique permissões.");
     }
