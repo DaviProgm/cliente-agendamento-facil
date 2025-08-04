@@ -69,13 +69,14 @@ export const onMessageListener = () =>
     onMessage(messaging, (payload) => {
       console.log("📩 Mensagem recebida em foreground:", payload);
 
-      // Exibir a notificação se possível
-      if (Notification.permission === "granted" && payload?.notification?.title) {
-        const { title, body } = payload.notification;
+      const { title, body } = payload.notification || {};
 
-        new Notification(title, {
-          body,
-          icon: "/logo.png", // você pode mudar esse ícone se quiser
+      if (Notification.permission === "granted" && title) {
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.showNotification(title, {
+            body,
+            icon: "/logo.png",
+          });
         });
       }
 
