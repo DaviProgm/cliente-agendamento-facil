@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as Sonner, toast } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -15,12 +15,41 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import HomePage from "./pages/homePage";
 import { useClarity } from "@/hooks/useClarity";
+import { requestForToken, onMessageListener } from "./firebase";
+import { saveNotificationToken } from "./services/clientService";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   // 🔍 Ativa Clarity com seu ID
   useClarity("soqsxg0usk");
+
+  useEffect(() => {
+    const handleToken = async () => {
+      try {
+        const token = await requestForToken();
+        if (token) {
+          await saveNotificationToken(token);
+        }
+      } catch (error) {
+        console.error("Erro ao salvar o token de notificação:", error);
+      }
+    };
+
+    handleToken();
+
+    onMessageListener()
+      .then((payload) => {
+        toast.info(payload.notification.body, {
+          description: payload.notification.title,
+          action: {
+            label: "Fechar",
+            onClick: () => {},
+          },
+        });
+      })
+      .catch((err) => console.log("failed: ", err));
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

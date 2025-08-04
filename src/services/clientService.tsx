@@ -14,3 +14,8 @@ export async function createClient(data: {
   const response = await api.post("/clientes", data);
   return response.data;
 }
+
+export async function saveNotificationToken(token: string) {
+  const response = await api.post("/users/save-notification-token", { token });
+  return response.data;
+}
