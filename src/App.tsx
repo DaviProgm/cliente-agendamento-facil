@@ -15,8 +15,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import HomePage from "./pages/homePage";
 import { useClarity } from "@/hooks/useClarity";
-import { requestForToken, onMessageListener } from "./firebase";
-import { saveNotificationToken } from "./services/clientService";
+import { onMessageListener } from "./firebase";
 
 const queryClient = new QueryClient();
 
@@ -25,19 +24,6 @@ const App = () => {
   useClarity("soqsxg0usk");
 
   useEffect(() => {
-    const handleToken = async () => {
-      try {
-        const token = await requestForToken();
-        if (token) {
-          await saveNotificationToken(token);
-        }
-      } catch (error) {
-        console.error("Erro ao salvar o token de notificação:", error);
-      }
-    };
-
-    handleToken();
-
     onMessageListener()
       .then((payload) => {
         toast.info(payload.notification.body, {

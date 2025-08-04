@@ -4,6 +4,9 @@ import { Hero } from "@/components/DashboardClient/Hero";
 import { SearchBar } from "@/components/DashboardClient/SearchBar";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { ProviderCard, Provider } from "@/components/ProviderCard";
+import { requestForToken } from "@/firebase";
+import { saveNotificationToken } from "@/services/clientService";
+import { toast } from "@/components/ui/sonner";
 
 export default function CustomerDashboard() {
   const [allProviders, setAllProviders] = useState<Provider[]>([]);
@@ -51,6 +54,19 @@ export default function CustomerDashboard() {
     console.log("Usuário deslogado");
   };
 
+  const handleEnableNotifications = async () => {
+    try {
+      const token = await requestForToken();
+      if (token) {
+        await saveNotificationToken(token);
+        toast.success("Notificações ativadas com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao ativar as notificações:", error);
+      toast.error("Erro ao ativar as notificações.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="flex justify-between items-center px-6 py-4 bg-white shadow-md">
@@ -59,6 +75,12 @@ export default function CustomerDashboard() {
             {firstLetter}
           </div>
           <span className="font-medium text-foreground">{userName}</span>
+          <button
+            onClick={handleEnableNotifications}
+            className="text-blue-500 border border-blue-500 px-4 py-1 rounded hover:bg-blue-500 hover:text-white transition"
+          >
+            Ativar Notificações
+          </button>
         </div>
 
         <button
@@ -113,3 +135,4 @@ export default function CustomerDashboard() {
     </div>
   );
 }
+
