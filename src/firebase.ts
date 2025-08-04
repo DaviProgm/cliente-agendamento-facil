@@ -68,6 +68,18 @@ export const onMessageListener = () =>
   new Promise((resolve) => {
     onMessage(messaging, (payload) => {
       console.log("📩 Mensagem recebida em foreground:", payload);
+
+      // Exibir a notificação se possível
+      if (Notification.permission === "granted" && payload?.notification?.title) {
+        const { title, body } = payload.notification;
+
+        new Notification(title, {
+          body,
+          icon: "/logo.png", // você pode mudar esse ícone se quiser
+        });
+      }
+
       resolve(payload);
     });
   });
+
