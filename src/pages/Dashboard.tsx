@@ -147,28 +147,30 @@ const Dashboard: React.FC = () => {
   };
 
 
-useEffect(() => {
-  onMessageListener()
-    .then((payload) => {
-      if (
-        typeof payload === "object" &&
-        payload !== null &&
-        "notification" in payload
-      ) {
-        const { title, body } = (payload as any).notification;
+  useEffect(() => {
+    onMessageListener()
+      .then((payload) => {
+        if (
+          typeof payload === "object" &&
+          payload !== null &&
+          "notification" in payload
+        ) {
+          const { title, body } = (payload as any).notification;
 
-        new Notification(title, {
-          body,
-          icon: "/logo.png",
-        });
-      }
-    })
-    .catch((err) => {
-      console.error("❌ Erro no listener de mensagem:", err);
-    });
+          navigator.serviceWorker.ready.then((registration) => {
+            registration.showNotification(title, {
+              body,
+              icon: "/logo.png",
+            });
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("❌ Erro no listener de mensagem:", err);
+      });
 
-  // Nenhum unsubscribe é necessário para onMessage
-}, []);
+    // Nenhum unsubscribe é necessário para onMessage
+  }, []);
 
 
 

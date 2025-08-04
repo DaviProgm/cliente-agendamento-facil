@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 
-// A utility to check for Notification API support
 const isNotificationAPISupported = () => typeof window !== 'undefined' && 'Notification' in window;
 
 export const useNotifications = () => {
@@ -24,14 +23,16 @@ export const useNotifications = () => {
   }, [isSupported]);
 
   const showNotification = useCallback((title: string, options?: NotificationOptions) => {
-  if (typeof window !== 'undefined' && 'Notification' in window && permission === 'granted') {
-    try {
-      new Notification(title, options);
-    } catch (err) {
-      console.error('Erro ao mostrar notificação:', err);
+    if (typeof window !== 'undefined' && 'Notification' in window && permission === 'granted') {
+      navigator.serviceWorker.ready
+        .then((registration) => {
+          registration.showNotification(title, options);
+        })
+        .catch((err) => {
+          console.error('Erro ao acessar service worker para notificação:', err);
+        });
     }
-  }
-}, [permission]);
+  }, [permission]);
 
   return { permission, requestPermission, showNotification, isSupported };
 };
