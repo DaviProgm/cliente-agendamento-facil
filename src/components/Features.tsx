@@ -20,13 +20,6 @@ const Features = () => {
           </p>
         </div>
         <div className="bg-white/10 p-6 rounded-2xl shadow-lg backdrop-blur h-56 flex flex-col justify-start">
-          <ThumbsUp className="w-8 h-8 mb-3 text-white" />
-          <h3 className="text-xl font-semibold mb-1">Totalmente Gratuito</h3>
-          <p className="text-sm text-white/80">
-            Utilize todas as funcionalidades sem pagar nada. Sem pegadinhas.
-          </p>
-        </div>
-        <div className="bg-white/10 p-6 rounded-2xl shadow-lg backdrop-blur h-56 flex flex-col justify-start">
           <Clock className="w-8 h-8 mb-3 text-white" />
           <h3 className="text-xl font-semibold mb-1">Economize Tempo</h3>
           <p className="text-sm text-white/80">
