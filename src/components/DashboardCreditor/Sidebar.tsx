@@ -28,14 +28,14 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, onToggleSidebar }: Sidebar
   ];
 
   return (
-    <div className="bg-white w-64 h-screen shadow-md border-r flex flex-col">
+    <div className="bg-card w-64 h-screen shadow-md border-r flex flex-col">
       <div className="p-4 border-b flex items-center justify-between">
-        <h2 className="text-xl font-extrabold text-gray-800 tracking-tight">Cloktrix</h2>
+        <h2 className="text-xl font-extrabold text-foreground tracking-tight">Cloktrix</h2>
         <button
-          className="border px-2 py-1 rounded-md border-gray-300 lg:hidden"
+          className="border px-2 py-1 rounded-md border-border lg:hidden"
           onClick={onToggleSidebar}
         >
-          <AlignJustify size={16} className="text-gray-700" />
+          <AlignJustify size={16} className="text-muted-foreground" />
         </button>
       </div>
 
@@ -49,11 +49,11 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, onToggleSidebar }: Sidebar
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center px-4 py-3 text-left rounded-md transition-colors duration-200 ${
                 isActive
-                  ? "bg-gray-100 text-[#8B5CF6] font-semibold"
-                  : "text-gray-700 hover:bg-gray-50"
+                  ? "bg-primary/10 text-primary font-semibold"
+                  : "text-muted-foreground hover:bg-secondary/20"
               }`}
             >
-              <Icon className={`w-5 h-5 mr-3 ${isActive ? "text-[#8B5CF6]" : "text-gray-500"}`} />
+              <Icon className={`w-5 h-5 mr-3 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
               <span className="truncate text-sm">{item.label}</span>
             </button>
           );

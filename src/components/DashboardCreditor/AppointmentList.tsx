@@ -69,13 +69,10 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
     appointment.service.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusColor = (status: string = "agendado") => {
-    switch (status) {
-      case "agendado": return "bg-white text-[#8B5CF6] border-[#8B5CF6]";
-      case "concluído": return "bg-[#A3FF12] text-black border-[#A3FF12]";
-      case "cancelado": return "bg-red-100 text-red-700 border-red-300";
-      default: return "bg-gray-100 text-gray-700 border-gray-300";
-    }
+  const statusStyles: { [key: string]: string } = {
+    agendado: "bg-card text-primary border-primary",
+    concluído: "bg-secondary text-secondary-foreground border-secondary",
+    cancelado: "bg-destructive text-destructive-foreground border-destructive",
   };
 
   const handleStatusChange = async (appointmentId: number, newStatus: string) => {
@@ -116,15 +113,15 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8B5CF6] w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               placeholder="Buscar agendamentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white text-[#8B5CF6] placeholder-gray-400 border border-[#8B5CF6] focus:ring-[#A3FF12] focus:border-[#A3FF12] rounded-xl shadow-sm"
+              className="pl-10 placeholder:text-muted-foreground"
             />
           </div>
-          <Button onClick={onAddAppointment} className="w-full sm:w-auto bg-white text-[#8B5CF6] hover:bg-gray-100">
+          <Button onClick={onAddAppointment} variant="default">
             <Calendar className="w-4 h-4 mr-2" /> Novo Agendamento
           </Button>
         </div>
@@ -137,17 +134,17 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="bg-white border border-[#8B5CF6]/20 shadow-md rounded-2xl">
+              <Card>
                 <CardHeader className="pb-3">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg truncate text-[#8B5CF6]">{appointment.name}</CardTitle>
-                      <p className="text-sm text-gray-600">{appointment.service}</p>
+                      <CardTitle className="text-lg truncate text-primary">{appointment.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{appointment.service}</p>
                     </div>
                     <select
                       value={appointment.status}
                       onChange={(e) => handleStatusChange(appointment.id, e.target.value)}
-                      className={`text-sm rounded px-2 py-1 border focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] ${getStatusColor(appointment.status)}`}
+                      className={`text-sm rounded px-2 py-1 border focus:outline-none focus:ring-2 focus:ring-primary ${statusStyles[appointment.status || 'agendado'] || 'bg-muted text-muted-foreground border-border'}`}
                     >
                       {statusOptions.map((status) => (
                         <option key={status} value={status}>
@@ -160,18 +157,17 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
                 <CardContent className="pt-0">
                   <div className="flex flex-col gap-3">
                     <div>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {formatDateToBR(appointment.date)} às {appointment.time}
                       </p>
                       {appointment.observations && (
-                        <p className="text-sm text-gray-500 mt-1">{appointment.observations}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{appointment.observations}</p>
                       )}
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
-                        className="text-[#8B5CF6] border-[#8B5CF6] hover:bg-[#8B5CF6]/10"
                         onClick={() => handleEditClick(appointment)}
                       >
                         Editar
@@ -180,7 +176,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
                       {appointment.status === "agendado" && (
                         <Button
                           size="sm"
-                          className="bg-[#A3FF12] text-black hover:bg-lime-300 transition-colors"
+                          variant="secondary"
                           onClick={() => handleCompleteAppointment(appointment.id)}
                         >
                           Concluir

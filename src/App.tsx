@@ -10,7 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import PrivateRoute from "@/components/DashboardCreditor/PrivateRoute";
 import Register from "./pages/register";
-import DashboardCustumer from "./pages/DashboardCustumer";
+import Assinatura from "./pages/Assinatura";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import HomePage from "./pages/homePage";
@@ -58,14 +58,9 @@ const App = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
             <Route
-              path="/dashboard-cliente"
-              element={
-                <PrivateRoute>
-                  <DashboardCustumer />
-                </PrivateRoute>
-              }
+              path="/register"
+              element={<Register />}
             />
             <Route
               path="/dashboard"
@@ -76,6 +71,14 @@ const App = () => {
               }
             />
             <Route path="*" element={<NotFound />} />
+            <Route
+              path="/assinatura"
+              element={
+                <PrivateRoute>
+                  <Assinatura />
+                </PrivateRoute>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

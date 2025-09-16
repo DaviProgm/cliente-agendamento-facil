@@ -4,14 +4,15 @@ import api from "@/instance/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "react-toastify";
+
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 const RegisterForm = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  const [cpfCnpj, setCpfCnpj] = useState(""); // 1. Adicionado estado para CPF/CNPJ
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -20,26 +21,32 @@ const RegisterForm = () => {
     setLoading(true);
 
     try {
+      // 3. Adicionado cpfCnpj no envio para a API
       await api.post("/users/register", {
         name,
         email,
         password,
-        role,
+        cpfCnpj,
+        role: "customer",
       });
 
       toast.success("Cadastro realizado com sucesso! Faça o login para continuar.");
       navigate("/login");
     } catch (error: any) {
-      toast.error(`Erro ao cadastrar: ${error.response?.data?.message || error.message}`);
+      const errorMessage = error.response?.data?.errors?.[0]?.description ||
+                           error.response?.data?.message ||
+                           error.message;
+      toast.error(`Erro ao cadastrar: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Nome</Label>
+    <Card className="p-4 sm:p-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">Nome</Label>
         <Input
           id="name"
           type="text"
@@ -50,6 +57,21 @@ const RegisterForm = () => {
           className="bg-gray-100 text-black rounded-md"
         />
       </div>
+
+      {/* 2. Adicionado campo do formulário para CPF/CNPJ */}
+      <div className="space-y-2">
+        <Label htmlFor="cpfCnpj">CPF ou CNPJ</Label>
+        <Input
+          id="cpfCnpj"
+          type="text"
+          placeholder="Seu CPF ou CNPJ"
+          value={cpfCnpj}
+          onChange={(e) => setCpfCnpj(e.target.value)}
+          required
+          className="bg-gray-100 text-black rounded-md"
+        />
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -59,7 +81,7 @@ const RegisterForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="bg-gray-100 text-black rounded-md"
+          className="bg-ray-100 text-black rounded-md"
         />
       </div>
       <div className="space-y-2">
@@ -74,18 +96,6 @@ const RegisterForm = () => {
           className="bg-gray-100 text-black rounded-md"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="role">Tipo de Conta</Label>
-        <Select onValueChange={setRole} value={role}>
-          <SelectTrigger className="bg-gray-100 text-black rounded-md">
-            <SelectValue placeholder="Selecione o tipo de conta" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="customer">Cliente</SelectItem>
-            <SelectItem value="creditor">Prestador de Serviço</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
       <Button
         type="submit"
@@ -95,6 +105,7 @@ const RegisterForm = () => {
         {loading ? "Criando conta..." : "Criar Conta"}
       </Button>
     </form>
+  </Card>
   );
 };
 

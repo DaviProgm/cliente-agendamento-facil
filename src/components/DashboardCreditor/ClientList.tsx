@@ -82,17 +82,18 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
-            placeholder="Buscar clientes..."
+            type="text"
+            placeholder="Buscar cliente..."
+            className="max-w-sm pl-9 placeholder:text-muted-foreground"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-white text-[#8B5CF6] placeholder-gray-400 border border-[#8B5CF6] focus:ring-[#A3FF12] focus:border-[#A3FF12] rounded-xl shadow-sm"
           />
         </div>
         <Button
           onClick={onAddClient}
-          className="w-full sm:w-auto bg-white text-[#8B5CF6] hover:bg-[#f3f3f3]"
+          variant="default"
         >
           <UserPlus className="w-4 h-4 mr-2" />
           Adicionar Cliente
@@ -109,17 +110,17 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="bg-white text-[#8B5CF6] rounded-2xl shadow-lg">
+              <Card>
                 <CardHeader className="pb-3">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-lg truncate">{client.name}</CardTitle>
-                      <p className="text-sm truncate">{client.email}</p>
-                      <p className="text-sm">{client.phone}</p>
+                      <p className="text-sm truncate text-muted-foreground">{client.email}</p>
+                      <p className="text-sm text-muted-foreground">{client.phone}</p>
                     </div>
                     <Badge
                       variant="secondary"
-                      className={`self-start ${client.status === "ativo" ? "bg-[#A3FF12] text-black" : "bg-gray-400 text-white"}`}
+                      className={`self-start ${client.status === "ativo" ? "bg-secondary/50 text-secondary-foreground" : "bg-destructive/50 text-destructive-foreground"}`}
                     >
                       {client.status}
                     </Badge>
@@ -127,13 +128,13 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                    <p className="text-sm">
+                    <p className="text-sm text-muted-foreground">
                       Último agendamento: {formatDate(client.lastAppointment)}
                     </p>
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
-                      className="w-full sm:w-auto border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6]/10"
+                      className="w-full sm:w-auto"
                       onClick={() => {
                         setSelectedClient(client);
                         setDetailsModalOpen(true);

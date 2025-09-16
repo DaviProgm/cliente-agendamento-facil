@@ -188,36 +188,36 @@ const Dashboard: React.FC = () => {
       default:
         return (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="bg-white text-gray-900 shadow-xl border border-gray-200">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
-                <Users className="h-4 w-4 text-[#8B5CF6]" />
+                <Users className="h-4 w-4 text-primary" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalClientes || 0}</div>
-                <p className="text-xs text-gray-500">+2 novos este mês</p>
+                <p className="text-xs text-muted-foreground">+2 novos este mês</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white text-gray-900 shadow-xl border border-gray-200">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Agendamentos Hoje</CardTitle>
-                <Calendar className="h-4 w-4 text-[#8B5CF6]" />
+                <Calendar className="h-4 w-4 text-primary" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{agendamentosHoje}</div>
-                <p className="text-xs text-gray-500">pendentes</p>
+                <p className="text-xs text-muted-foreground">pendentes</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white text-gray-900 shadow-xl border border-gray-200">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Agendamentos Mês</CardTitle>
-                <Calendar className="h-4 w-4 text-[#8B5CF6]" />
+                <Calendar className="h-4 w-4 text-primary" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{agendamentosMes}</div>
-                <p className="text-xs text-gray-500">+12% em relação ao mês anterior</p>
+                <p className="text-xs text-muted-foreground">+12% em relação ao mês anterior</p>
               </CardContent>
             </Card>
 
@@ -255,7 +255,7 @@ const Dashboard: React.FC = () => {
     );
   }
   return (
-    <div className="flex h-screen bg-white text-gray-900">
+    <div className="flex h-screen bg-background text-foreground">
       <div className="hidden lg:block">
         <Sidebar
           activeTab={activeTab}
@@ -286,7 +286,7 @@ const Dashboard: React.FC = () => {
       )}
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white border-b border-gray-200 shadow-sm p-4">
+        <header className="bg-card border-b border-border shadow-sm p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <Button
@@ -319,7 +319,7 @@ const Dashboard: React.FC = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-6">
           {renderContent()}
         </main>
       </div>

@@ -19,6 +19,9 @@ export default {
 		},
 		extend: {
 			colors: {
+        'galactic-dark': '#0B0B0D',
+        'galactic-indigo': '#4B0082',
+        'galactic-blue': '#243c74',
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

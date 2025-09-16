@@ -58,28 +58,28 @@ export function DailyCalendar({
   const timeSlots = generateTimeSlots();
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-2xl shadow-lg border border-gray-200">
-      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-sm p-4 rounded-lg mb-6 flex items-center justify-between">
-        <button onClick={() => onDateChange?.(addDays(date, -1))} className="text-gray-600 hover:text-black px-3 py-1 border rounded-lg shadow-sm">‹</button>
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-card rounded-2xl shadow-lg border border-border">
+      <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-sm p-4 rounded-lg mb-6 flex items-center justify-between">
+        <button onClick={() => onDateChange?.(addDays(date, -1))} className="text-muted-foreground hover:text-foreground px-3 py-1 border rounded-lg shadow-sm">‹</button>
         <div className="text-center">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">
             {format(date, "EEEE, dd 'de' MMMM yyyy", { locale: ptBR })}
           </h2>
           <button
             onClick={() => onDateChange?.(new Date())}
             disabled={isToday(date)}
-            className="text-sm text-indigo-600 hover:underline disabled:text-gray-400 disabled:cursor-not-allowed"
+            className="text-sm text-primary hover:underline disabled:text-muted-foreground disabled:cursor-not-allowed"
           >
             Hoje
           </button>
         </div>
-        <button onClick={() => onDateChange?.(addDays(date, 1))} className="text-gray-600 hover:text-black px-3 py-1 border rounded-lg shadow-sm">›</button>
+        <button onClick={() => onDateChange?.(addDays(date, 1))} className="text-muted-foreground hover:text-foreground px-3 py-1 border rounded-lg shadow-sm">›</button>
       </div>
 
       <div className="relative">
         {isToday(date) && (
           <div
-            className="absolute left-12 right-0 h-0.5 bg-red-500 z-10"
+            className="absolute left-12 right-0 h-0.5 bg-destructive z-10"
             style={{
               top: `${((now.getHours() - startHour) * 60 + now.getMinutes()) / ((endHour - startHour) * 60) * 100}%`,
             }}
@@ -94,29 +94,29 @@ export function DailyCalendar({
 
             return (
               <div key={slotKey}>
-                <div className="text-right text-sm text-gray-500 pr-2 pt-3 font-mono">
+                <div className="text-right text-sm text-muted-foreground pr-2 pt-3 font-mono">
                   {time}
                 </div>
                 <div
                   onClick={() => !event && !isPast && onTimeSlotClick?.(time)}
                   className={`border-l-2 pl-4 py-3 relative ${
                     event
-                      ? 'border-red-200'
+                      ? 'border-destructive'
                       : isPast
-                      ? 'border-gray-200'
-                      : 'border-green-300 hover:border-green-500'
+                      ? 'border-border'
+                      : 'border-secondary hover:border-primary'
                   }`}
                 >
                   {event && (
                     <div
                       onClick={() => onEventClick?.(event)}
-                      className="bg-red-50 p-3 rounded-lg cursor-pointer hover:bg-red-100 transition-colors"
+                      className="bg-destructive/10 p-3 rounded-lg cursor-pointer hover:bg-destructive/20 transition-colors"
                     >
-                      <p className="font-semibold text-red-800">{event.title}</p>
+                      <p className="font-semibold text-destructive-foreground">{event.title}</p>
                       {event.description && (
-                        <p className="text-sm text-red-700">{event.description}</p>
+                        <p className="text-sm text-destructive-foreground/80">{event.description}</p>
                       )}
-                      <div className="text-xs text-red-600 mt-1">
+                      <div className="text-xs text-destructive-foreground/70 mt-1">
                         <Clock size={12} className="inline mr-1" />
                         {event.startTime} - {event.endTime}
                       </div>
@@ -124,11 +124,11 @@ export function DailyCalendar({
                   )}
 
                   {!event && isPast && (
-                    <div className="text-gray-400 italic text-sm">Tempo expirado</div>
+                    <div className="text-muted-foreground italic text-sm">Tempo expirado</div>
                   )}
 
                   {!event && !isPast && (
-                    <div className="text-green-700 font-medium text-sm cursor-pointer flex items-center">
+                    <div className="text-secondary font-medium text-sm cursor-pointer flex items-center">
                       <PlusCircle size={14} className="mr-2" />
                       Disponível
                     </div>

@@ -4,13 +4,13 @@ import Features from "../components/Features";
 import HowItWorks from "../components/HowItWorks";
 import Testimonials from "../components/Testimonials";
 import Footer from "../components/Footer";
-import AdBanner from "../components/Adbanner";
+import Pricing from "../components/Pricing";
 import Bubbles from "../components/Bubbles";
 import { ArrowDown } from "lucide-react";
 
 const HomePage = () => {
   return (
-    <div className="relative flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-300 via-[#8B5CF6] to-[#A3FF12] text-white px-6 py-4 overflow-hidden">
+    <div className="relative flex flex-col items-center min-h-screen bg-gradient-to-br from-galactic-dark via-galactic-blue to-galactic-dark text-foreground px-6 py-4 overflow-hidden">
       <Bubbles />
       <div className="relative z-10 w-full flex flex-col items-center">
         <Header />
@@ -21,11 +21,9 @@ const HomePage = () => {
             <ArrowDown className="w-6 h-6" />
           </div>
           <Features />
+          <Pricing />
           <HowItWorks />
           <Testimonials />
-          <div className="mt-12 flex justify-center">
-            <AdBanner />
-          </div>
         </main>
         <Footer />
       </div>

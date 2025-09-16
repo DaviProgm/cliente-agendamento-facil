@@ -46,7 +46,7 @@ const LoginForm = () => {
 
       setTimeout(() => {
         if (user.role === "customer") {
-          navigate("/dashboard-cliente");
+          navigate("/assinatura");
         } else {
           navigate("/dashboard");
         }
