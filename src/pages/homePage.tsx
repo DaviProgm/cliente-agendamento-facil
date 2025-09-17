@@ -10,7 +10,7 @@ import { ArrowDown } from "lucide-react";
 
 const HomePage = () => {
   return (
-    <div className="relative flex flex-col items-center min-h-screen bg-gradient-to-br from-galactic-dark via-galactic-blue to-galactic-dark text-foreground px-6 py-4 overflow-hidden">
+    <div className="relative flex flex-col items-center min-h-screen bg-gradient-to-br from-galactic-dark via-galactic-indigo to-galactic-dark text-foreground px-6 py-4 overflow-hidden">
       <Bubbles />
       <div className="relative z-10 w-full flex flex-col items-center">
         <Header />

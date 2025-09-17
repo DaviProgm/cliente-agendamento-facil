@@ -255,7 +255,7 @@ const Dashboard: React.FC = () => {
     );
   }
   return (
-    <div className="flex h-screen bg-background text-foreground">
+    <div className="flex h-screen bg-gradient-to-br from-galactic-dark via-galactic-indigo to-galactic-dark text-foreground">
       <div className="hidden lg:block">
         <Sidebar
           activeTab={activeTab}
@@ -286,7 +286,7 @@ const Dashboard: React.FC = () => {
       )}
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-card border-b border-border shadow-sm p-4">
+        <header className="bg-card/80 backdrop-blur-sm border-b border-border shadow-sm p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <Button
@@ -319,7 +319,7 @@ const Dashboard: React.FC = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-transparent p-6">
           {renderContent()}
         </main>
       </div>

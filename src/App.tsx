@@ -14,6 +14,8 @@ import Assinatura from "./pages/Assinatura";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import HomePage from "./pages/homePage";
+import Terms from "./pages/Terms";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { useClarity } from "@/hooks/useClarity";
 import { onMessageListener } from "./firebase";
 
@@ -79,6 +81,8 @@ const App = () => {
                 </PrivateRoute>
               }
             />
+            <Route path="/termos" element={<Terms />} />
+            <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

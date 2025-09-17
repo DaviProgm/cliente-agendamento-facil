@@ -3,7 +3,7 @@ import LoginForm from "@/components/LoginForm";
 const Login = () => {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-      <div className="flex flex-col items-center justify-center bg-gradient-to-br from-galactic-dark via-galactic-blue to-galactic-dark p-8 sm:p-12 text-foreground">
+      <div className="flex flex-col items-center justify-center bg-gradient-to-br from-galactic-dark via-galactic-indigo to-galactic-dark p-8 sm:p-12 text-foreground">
         <div className="flex flex-col items-center text-center">
           <img src="/logo.png" alt="Logo Cloktrix" className="h-32 sm:h-48 object-contain mb-4" />
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight drop-shadow-md">
@@ -20,7 +20,7 @@ const Login = () => {
             Entrar na sua conta
           </h2>
           <p className="text-muted-foreground mb-8 text-center">
-            Acesse sua agenda personalizada gratuitamente
+            Acesse sua agenda personalizada
           </p>
           <LoginForm />
           <div className="mt-6 text-center">
