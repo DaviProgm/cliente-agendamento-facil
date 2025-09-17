@@ -30,7 +30,7 @@ api.interceptors.response.use(
         {
           position: "top-center",
           autoClose: 6000,
-          onClick: () => { window.location.href = '/assinatura'; },
+          onClick: () => { window.location.href = '/dashboard'; },
           pauseOnHover: true,
           draggable: true,
         }
