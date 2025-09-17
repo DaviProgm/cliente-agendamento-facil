@@ -45,11 +45,7 @@ const LoginForm = () => {
       });
 
       setTimeout(() => {
-        if (user.role === "customer") {
-          navigate("/assinatura");
-        } else {
-          navigate("/dashboard");
-        }
+        navigate("/dashboard");
       }, 100);
     } catch (error: any) {
       toast({
@@ -75,7 +71,6 @@ const LoginForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="bg-gray-100 text-black rounded-md"
         />
       </div>
       <div className="space-y-2">
@@ -87,13 +82,13 @@ const LoginForm = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="bg-gray-100 text-black rounded-md"
         />
       </div>
 
       <Button
         type="submit"
-        className="w-full bg-indigo-700 text-white hover:bg-indigo-800 font-semibold shadow-md mt-2"
+        className="w-full font-semibold shadow-md mt-2"
+        variant="default"
         disabled={loading}
       >
         {loading ? "Entrando..." : "Entrar"}

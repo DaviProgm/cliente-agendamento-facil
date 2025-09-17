@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, BarChart3, LogOut, AlignJustify } from "lucide-react";
+import { Calendar, Users, BarChart3, LogOut, AlignJustify, User } from "lucide-react";
 
 interface SidebarProps {
   activeTab: string;
@@ -24,6 +24,11 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, onToggleSidebar }: Sidebar
       id: "appointments",
       label: "Agendamentos",
       icon: Calendar,
+    },
+    {
+      id: "profile",
+      label: "Meu Perfil",
+      icon: User,
     },
   ];
 

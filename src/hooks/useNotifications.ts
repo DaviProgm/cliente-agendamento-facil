@@ -9,6 +9,7 @@ export const useNotifications = () => {
   useEffect(() => {
     if (isNotificationAPISupported()) {
       setIsSupported(true);
+      console.log("Browser notification permission is:", Notification.permission);
       setPermission(Notification.permission);
     } else {
       setIsSupported(false);

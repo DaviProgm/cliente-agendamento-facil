@@ -73,14 +73,6 @@ const App = () => {
               }
             />
             <Route path="*" element={<NotFound />} />
-            <Route
-              path="/assinatura"
-              element={
-                <PrivateRoute>
-                  <Assinatura />
-                </PrivateRoute>
-              }
-            />
             <Route path="/termos" element={<Terms />} />
             <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
           </Routes>

@@ -10,12 +10,20 @@ import AddClientModal from "@/components/DashboardCreditor/AddClientModal";
 import AddAppointmentModal from "@/components/DashboardCreditor/AddAppointmentModal";
 import api from "@/instance/api";
 import CreditorProfile from "@/components/DashboardCreditor/CreditorProfile";
+import Assinatura from "./Assinatura";
 import { parseISO, getMonth, getYear, differenceInMinutes, format } from 'date-fns';
 import { useNotifications } from "@/hooks/useNotifications";
 import { onMessageListener } from "@/firebase";
 import { requestForToken } from "../firebase"; // ajuste o caminho conforme o local do arquivo
 import { getMessaging, onMessage } from "firebase/messaging";
 import { initializeApp } from "firebase/app";
+
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+interface Notification {
+  title: string;
+  body: string;
+}
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -27,6 +35,8 @@ const Dashboard: React.FC = () => {
   const [totalClientes, setTotalClientes] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [providerId, setProviderId] = useState<number | null>(null);
+  const [hasNewNotification, setHasNewNotification] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const navigate = useNavigate();
   const { permission, requestPermission, showNotification } = useNotifications();
@@ -76,8 +86,14 @@ const Dashboard: React.FC = () => {
               const diffMinutes = differenceInMinutes(appointmentDate, now);
 
               if (diffMinutes > 0 && diffMinutes <= 60) {
-                showNotification('Lembrete de Agendamento', {
-                  body: `Você tem um agendamento em ${format(appointmentDate, 'HH:mm')}.`,
+                const newNotif = {
+                  title: 'Lembrete de Agendamento',
+                  body: `Você tem um agendamento em ${format(appointmentDate, 'HH:mm')}.`
+                };
+                setHasNewNotification(true);
+                setNotifications(prev => [newNotif, ...prev]);
+                showNotification(newNotif.title, {
+                  body: newNotif.body,
                   icon: '/logo.png'
                 });
               }
@@ -130,9 +146,9 @@ const Dashboard: React.FC = () => {
     navigate("/login");
   };
   const handleRequestPermission = async () => {
-    await requestPermission(); // só executa, não testa
+    await requestPermission();
 
-    const token = await requestForToken(); // esse sim retorna algo
+    const token = await requestForToken();
 
     if (token) {
       try {
@@ -156,6 +172,8 @@ const Dashboard: React.FC = () => {
           "notification" in payload
         ) {
           const { title, body } = (payload as any).notification;
+          setHasNewNotification(true);
+          setNotifications(prev => [{ title, body }, ...prev]);
 
           navigator.serviceWorker.ready.then((registration) => {
             registration.showNotification(title, {
@@ -169,7 +187,6 @@ const Dashboard: React.FC = () => {
         console.error("❌ Erro no listener de mensagem:", err);
       });
 
-    // Nenhum unsubscribe é necessário para onMessage
   }, []);
 
 
@@ -185,6 +202,8 @@ const Dashboard: React.FC = () => {
             refreshFlag={false}
           />
         );
+      case "profile":
+        return <Assinatura />;
       default:
         return (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -235,6 +254,8 @@ const Dashboard: React.FC = () => {
         return "Clientes";
       case "appointments":
         return "Agendamentos";
+      case "profile":
+        return "Meu Perfil";
       default:
         return "";
     }
@@ -301,7 +322,48 @@ const Dashboard: React.FC = () => {
                 {getTitle()}
               </h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
+              <Popover onOpenChange={(open) => open && setHasNewNotification(false)}>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    {hasNewNotification && (
+                      <span className="absolute top-0 right-0 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+                      </span>
+                    )}
+                    <Bell className={`w-5 h-5`} />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="grid gap-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium leading-none">Notificações</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Você tem {notifications.length} novas mensagens.
+                      </p>
+                    </div>
+                    <div className="grid gap-2">
+                      {notifications.length > 0 ? (
+                        notifications.map((notif, index) => (
+                          <div key={index} className="grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0">
+                            <span className="flex h-2 w-2 translate-y-1 rounded-full bg-primary" />
+                            <div className="grid gap-1">
+                              <p className="text-sm font-medium">{notif.title}</p>
+                              <p className="text-sm text-muted-foreground">{notif.body}</p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Nenhuma notificação nova.</p>
+                      )}
+                    </div>
+                    {notifications.length > 0 && (
+                      <Button variant="outline" size="sm" onClick={() => setNotifications([])}>Limpar</Button>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               {permission === 'default' && (
                 <Button onClick={handleRequestPermission} size="sm" variant="outline">
