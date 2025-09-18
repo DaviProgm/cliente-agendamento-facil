@@ -13,7 +13,7 @@ const Terms = () => {
             <p>Última atualização: 16 de setembro de 2025</p>
 
             <p>
-              Bem-vindo ao Workgate! Estes termos e condições descrevem as regras e regulamentos para o uso do nosso software, localizado em [URL do seu site]. Ao acessar este software, presumimos que você aceita estes termos e condições. Não continue a usar o Workgate se não concordar com todos os termos e condições declarados nesta página.
+              Bem-vindo ao Workgate! Estes termos e condições descrevem as regras e regulamentos para o uso do nosso software, localizado em www.workgate.com.br. A Workgate foi fundada por Davi Monteiro Barros. Ao acessar este software, presumimos que você aceita estes termos e condições. Não continue a usar o Workgate se não concordar com todos os termos e condições declarados nesta página.
             </p>
 
             <h2 className="text-2xl font-bold text-foreground pt-4">1. Uso da Licença</h2>
