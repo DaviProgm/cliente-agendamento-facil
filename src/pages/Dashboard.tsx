@@ -17,6 +17,7 @@ import { onMessageListener } from "@/firebase";
 import { requestForToken } from "../firebase"; // ajuste o caminho conforme o local do arquivo
 import { getMessaging, onMessage } from "firebase/messaging";
 import { initializeApp } from "firebase/app";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -38,6 +39,7 @@ const Dashboard: React.FC = () => {
   const [providerId, setProviderId] = useState<number | null>(null);
   const [hasNewNotification, setHasNewNotification] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const navigate = useNavigate();
   const { permission, requestPermission, showNotification } = useNotifications();
@@ -54,6 +56,13 @@ const Dashboard: React.FC = () => {
     const stored = localStorage.getItem("userId");
     if (stored && !isNaN(parseInt(stored))) {
       setProviderId(parseInt(stored));
+    }
+
+    const tutorialShown = localStorage.getItem('dashboard_tutorial_shown');
+    console.log("Dashboard useEffect - tutorialShown:", tutorialShown);
+    if (!tutorialShown) {
+      setShowTutorial(true);
+      console.log("Dashboard useEffect - showTutorial after set:", true);
     }
   }, [navigate]);
 
@@ -397,6 +406,51 @@ const Dashboard: React.FC = () => {
         onClose={() => setIsAppointmentModalOpen(false)}
         onCreated={() => { }}
       />
+
+      {/* Tutorial Dialog */}
+      <Dialog open={showTutorial} onOpenChange={setShowTutorial}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bem-vindo ao Workgate!</DialogTitle>
+            <DialogDescription>
+              Vamos te guiar pelos primeiros passos para você aproveitar ao máximo sua agenda.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold">1. Adicione seus Clientes</h3>
+              <p className="text-sm text-muted-foreground">
+                Comece cadastrando seus clientes na aba "Clientes". Assim, você terá todas as informações importantes à mão.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold">2. Crie Agendamentos</h3>
+              <p className="text-sm text-muted-foreground">
+                Na aba "Agendamentos", você pode marcar os horários dos seus serviços. É rápido e fácil!
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold">3. Controle Total no Dashboard</h3>
+              <p className="text-sm text-muted-foreground">
+                Aqui na "Visão Geral", você acompanha seus agendamentos do dia e do mês, e o total de clientes.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold">4. Gerencie sua Assinatura</h3>
+              <p className="text-sm text-muted-foreground">
+                Na aba "Meu Perfil", você pode ver e gerenciar os detalhes da sua assinatura.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => {
+              console.log("Setting dashboard_tutorial_shown to true in localStorage.");
+              localStorage.setItem('dashboard_tutorial_shown', 'true');
+              setShowTutorial(false);
+            }}>Entendi!</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -128,3 +128,9 @@
   background-repeat: no-repeat;
   animation: fill-text 2s linear infinite alternate;
 }
+
+@supports (-webkit-touch-callout: none) {
+  .galactic-background {
+    background-attachment: scroll;
+  }
+}
