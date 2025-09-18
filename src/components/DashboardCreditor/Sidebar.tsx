@@ -35,7 +35,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, onToggleSidebar }: Sidebar
   return (
     <div className="bg-card w-64 h-screen shadow-md border-r flex flex-col">
       <div className="p-4 border-b flex items-center justify-between">
-        <h2 className="text-xl font-extrabold text-foreground tracking-tight">Cloktrix</h2>
+        <h2 className="text-xl font-extrabold text-foreground tracking-tight">Workgate</h2>
         <button
           className="border px-2 py-1 rounded-md border-border lg:hidden"
           onClick={onToggleSidebar}

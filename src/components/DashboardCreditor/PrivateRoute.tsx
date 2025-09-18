@@ -1,4 +1,6 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import api from "@/instance/api";
 
 function isTokenValid(token: string | null) {
   if (!token) return false;
@@ -14,10 +16,53 @@ function isTokenValid(token: string | null) {
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const token = localStorage.getItem("token");
+  const [loading, setLoading] = useState(true);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkSubscription = async () => {
+      if (!isTokenValid(token)) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await api.get('/subscription');
+        console.log("PrivateRoute - Subscription Status from API:", response.data.subscription.status);
+        setSubscriptionStatus(response.data.subscription.status);
+      } catch (error: any) {
+        if (error.response?.status === 404 || error.response?.status === 403) {
+          setSubscriptionStatus('no_subscription');
+        } else {
+          console.error("Erro ao buscar status da assinatura:", error);
+          setSubscriptionStatus('error'); 
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSubscription();
+  }, [token]);
+
+  console.log("PrivateRoute - Final Subscription Status:", subscriptionStatus);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-background text-foreground">
+        <p>Verificando assinatura...</p>
+      </div>
+    );
+  }
 
   if (!isTokenValid(token)) {
     localStorage.removeItem("token");
     return <Navigate to="/login" />;
+  }
+
+  if (subscriptionStatus === 'pendente' || subscriptionStatus === 'no_subscription' || subscriptionStatus === 'error') {
+    return <Navigate to="/subscription-selection" />;
   }
 
   return children;

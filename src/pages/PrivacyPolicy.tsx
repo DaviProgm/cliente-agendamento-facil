@@ -13,7 +13,7 @@ const PrivacyPolicy = () => {
             <p>Última atualização: 16 de setembro de 2025</p>
 
             <p>
-              A sua privacidade é importante para nós. É política do Cloktrix respeitar a sua privacidade em relação a qualquer informação sua que possamos coletar no nosso software.
+              A sua privacidade é importante para nós. É política do Workgate respeitar a sua privacidade em relação a qualquer informação sua que possamos coletar no nosso software.
             </p>
 
             <h2 className="text-2xl font-bold text-foreground pt-4">1. Informações que coletamos</h2>

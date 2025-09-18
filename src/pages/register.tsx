@@ -12,7 +12,7 @@ const Register = () => {
         <div className="flex flex-col items-center text-center">
           <img src="/logo.png" alt="Logo Cloktrix" className="h-32 sm:h-48 object-contain mb-4" />
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight drop-shadow-md">
-            CLOKTRIX
+            WORKGATE
           </h1>
           <p className="text-lg sm:text-xl mt-4 max-w-md text-foreground/90">
             Organize seus agendamentos e clientes com facilidade e eficiência.

@@ -5,7 +5,7 @@ const Testimonials = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-secondary/20 p-6 rounded-2xl shadow-lg backdrop-blur">
           <p className="text-foreground/80 mb-4">
-            "O Cloktrix transformou a maneira como eu gerencio meus agendamentos. É simples, intuitivo e me economiza muito tempo."
+            "O Workgate transformou a maneira como eu gerencio meus agendamentos. É simples, intuitivo e me economiza muito tempo."
           </p>
           <div className="flex items-center">
             <img src="/placeholder.svg" alt="Avatar" className="w-12 h-12 rounded-full mr-4" />

@@ -8,8 +8,8 @@ const Header = () => {
   return (
     <header className="w-full max-w-6xl mx-auto flex justify-between items-center p-4 bg-transparent text-foreground">
       <div className="flex items-center">
-        <img src="/logo.png" alt="Logo Cloktrix" className="h-[70px] w-auto" />
-        <span className="text-2xl font-bold ml-2">CLOKTRIX</span>
+            <img src="/logo.png" alt="Logo Cloktrix" className="h-[100px] w-auto ml-[-15px]" />
+        <span className="text-2xl font-bold ml-[-15px]">WORKGATE</span>
       </div>
       <nav className="hidden md:flex items-center gap-6">
         <a href="#features" className="hover:underline">benefícios</a>

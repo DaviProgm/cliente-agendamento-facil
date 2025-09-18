@@ -7,7 +7,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCiVNjAm654VESAvglmZUR-ZHHb72LHSqQ",
   authDomain: "cloktrix.firebaseapp.com",
   projectId: "cloktrix",
-  storageBucket: "cloktrix.appspot.com",
+  storageBucket: "workgate.appspot.com",
   messagingSenderId: "744344387840",
   appId: "1:744344387840:web:a4749ce18ad10490a073e5",
   measurementId: "G-SGW0TQKSYH",

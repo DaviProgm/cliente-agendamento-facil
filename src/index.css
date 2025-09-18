@@ -101,3 +101,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes fill-text {
+  from {
+    --fill-percentage: 0%;
+  }
+  to {
+    --fill-percentage: 100%;
+  }
+}
+
+.workgate-fill-animation {
+  color: transparent;
+  -webkit-text-stroke: 1px hsl(var(--foreground)); /* Outline */
+  background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) var(--fill-percentage), transparent var(--fill-percentage), transparent 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-repeat: no-repeat;
+  animation: fill-text 2s linear infinite alternate;
+}
