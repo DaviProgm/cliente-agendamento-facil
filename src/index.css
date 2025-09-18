@@ -103,6 +103,7 @@
 }
 
 .galactic-background {
+  background-color: hsl(var(--background)); /* Solid base color */
   background-image: linear-gradient(to bottom right, hsl(220 80% 10%), hsl(275 73% 53%)), url('/images/stars.png');
   background-size: cover;
   background-attachment: fixed;
