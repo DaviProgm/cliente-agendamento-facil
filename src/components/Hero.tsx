@@ -5,7 +5,12 @@ const Hero = () => {
     <div className="relative z-10 w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center py-20">
       {/* Left Column: Text Content */}
       <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-        <img src="/logo.png" alt="Logo Workgate" className="h-24 object-contain mb-4 lg:hidden" />
+        <img
+          src="/logo.png"
+          alt="Logo Workgate"
+          className="h-[250px] md:h-[80px] object-contain mb-4 lg:hidden"
+        />
+
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight mb-4">
           Organize seu tempo, <br className="hidden md:inline" />maximize seus resultados.
         </h1>
@@ -35,17 +40,14 @@ const Hero = () => {
       {/* Right Column: Dashboard Screenshots */}
       <div className="relative flex justify-center lg:justify-end mt-12 lg:mt-0">
         {/* Desktop Screenshot */}
-        <img 
-          src="/modelo.png" 
-          alt="Dashboard Workgate Desktop" 
+        <img
+          src="/modelo.png"
+          alt="Dashboard Workgate Desktop"
           className="hidden md:block w-full max-w-xl rounded-lg shadow-xl  border-border"
         />
         {/* Mobile Screenshot (Optional, positioned over desktop or separately) */}
-        <img 
-          src="/logo.png" 
-          alt="Dashboard Workgate Mobile" 
-          className="md:hidden w-3/4 max-w-xs rounded-lg shadow-xl border border-border absolute bottom-0 right-0 transform translate-x-1/4 translate-y-1/4"
-        />
+
+
       </div>
     </div>
   );

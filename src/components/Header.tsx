@@ -14,10 +14,10 @@ const Header = () => {
 
   return (
     <header
-      className={`w-full max-w-6xl mx-auto flex justify-between items-center p-4 text-foreground transition-all duration-300 sticky top-0 z-40`}
+      className={` mt-[-90px] w-full max-w-6xl mx-auto flex justify-between items-center p-4 text-foreground transition-all duration-300 sticky top-0 z-40`}
     >
-      <div className="flex items-center">
-        <img src="/logo.png" alt="Logo Workgate" className="h-[100px] w-auto ml-[-15px]" />
+      <div className="flex items-center ">
+        <img src="/logo.png" alt="Logo Workgate" className="h-[100px] w-auto ml-[-15px] " />
         <span className="text-2xl font-bold ml-[-15px]">WORKGATE</span>
       </div>
 
