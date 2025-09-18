@@ -20,8 +20,8 @@ export default {
 		extend: {
 			colors: {
         'galactic-dark': '#0B0B0D',
-        'galactic-indigo': '#4B0082',
-        'galactic-blue': '#243c74',
+        'galactic-indigo': '#8A2BE2',
+        'galactic-blue': '#00BFFF',
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -63,7 +63,7 @@ export default {
 					accent: 'hsl(var(--sidebar-accent))',
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+					ring: 'hsl(var(--sidebar-ring)'
 				}
 			},
 			borderRadius: {

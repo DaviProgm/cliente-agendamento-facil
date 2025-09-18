@@ -7,50 +7,50 @@
 @layer base {
   :root {
     --background: 240 8% 5%;
-    --foreground: 220 14% 90%;
+    --foreground: 288 48% 88%;
 
     --card: 240 10% 12%;
-    --card-foreground: 220 14% 90%;
+    --card-foreground: 288 48% 88%;
 
     --popover: 240 8% 5%;
-    --popover-foreground: 220 14% 90%;
+    --popover-foreground: 288 48% 88%;
 
-    --primary: 275 100% 25%;
+    --primary: 275 73% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 53% 30%;
+    --secondary: 195 100% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 222 53% 20%;
-    --muted-foreground: 220 14% 70%;
+    --muted: 275 10% 30%;
+    --muted-foreground: 288 20% 70%;
 
-    --accent: 275 100% 25%;
+    --accent: 275 73% 53%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 222 53% 30%;
-    --input: 222 53% 25%;
-    --ring: 275 100% 35%;
+    --border: 275 20% 40%;
+    --input: 275 15% 25%;
+    --ring: 275 73% 60%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 240 10% 12%;
 
-    --sidebar-foreground: 220 14% 90%;
+    --sidebar-foreground: 288 48% 88%;
 
-    --sidebar-primary: 275 100% 25%;
+    --sidebar-primary: 275 73% 53%;
 
     --sidebar-primary-foreground: 0 0% 100%;
 
-    --sidebar-accent: 222 53% 30%;
+    --sidebar-accent: 195 100% 50%;
 
     --sidebar-accent-foreground: 0 0% 100%;
 
-    --sidebar-border: 222 53% 30%;
+    --sidebar-border: 275 20% 40%;
 
-    --sidebar-ring: 275 100% 35%;
+    --sidebar-ring: 275 73% 60%;
   }
 
   .dark {
@@ -100,6 +100,13 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.galactic-background {
+  background-image: linear-gradient(to bottom right, hsl(220 80% 10%), hsl(275 73% 53%)), url('/images/stars.png');
+  background-size: cover;
+  background-attachment: fixed;
+  background-blend-mode: screen; /* Experiment with screen, lighten, overlay */
 }
 
 @keyframes fill-text {

@@ -19,6 +19,7 @@ import PaymentRequired from "./pages/PaymentRequired";
 import SubscriptionSelection from "./pages/SubscriptionSelection";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import ForgotPassword from "./pages/ForgotPassword";
+import About from "./pages/About";
 import { useClarity } from "@/hooks/useClarity";
 import { onMessageListener } from "./firebase";
 import SupportBubble from "@/components/SupportBubble";
@@ -74,6 +75,7 @@ const AppRoutes = () => {
         <Route path="/subscription-selection" element={<SubscriptionSelection />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/sobre" element={<About />} />
       </Routes>
       <SupportBubbleWrapper />
     </>
