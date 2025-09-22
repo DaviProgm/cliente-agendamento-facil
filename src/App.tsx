@@ -21,9 +21,17 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import ForgotPassword from "./pages/ForgotPassword";
 import About from "./pages/About";
 import ResetPassword from "./pages/ResetPassword";
+import ProfilePage from "./pages/Profile.tsx";
+import MyHoursPage from "./pages/MyHours.tsx";
+import BookingPage from "./pages/BookingPage.tsx";
 import { useClarity } from "@/hooks/useClarity";
 import { onMessageListener } from "./firebase";
 import SupportBubble from "@/components/SupportBubble";
+import Overview from "./components/DashboardCreditor/Overview";
+import ClientList from "./components/DashboardCreditor/ClientList";
+import AppointmentList from "./components/DashboardCreditor/AppointmentList";
+import ServicesPage from "./components/DashboardCreditor/ServicesPage";
+import Assinatura from "./pages/Assinatura";
 
 const queryClient = new QueryClient();
 
@@ -67,8 +75,15 @@ const AppRoutes = () => {
         <Route
           path="/dashboard"
           element={<PrivateRoute><Dashboard /></PrivateRoute>}
-          key={location.pathname}
-        />
+        >
+          <Route index element={<Overview />} />
+          <Route path="clients" element={<ClientList />} />
+          <Route path="appointments" element={<AppointmentList />} />
+          <Route path="services" element={<ServicesPage />} />
+          <Route path="subscription" element={<Assinatura />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="my-hours" element={<MyHoursPage />} />
+        </Route>
         <Route path="*" element={<NotFound />} />
         <Route path="/termos" element={<Terms />} />
         <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
@@ -78,6 +93,7 @@ const AppRoutes = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/sobre" element={<About />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/agendar/:username" element={<BookingPage />} />
       </Routes>
       <SupportBubbleWrapper />
     </>

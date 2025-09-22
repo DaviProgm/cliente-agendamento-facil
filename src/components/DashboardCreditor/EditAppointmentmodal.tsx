@@ -1,145 +1,243 @@
-import { useState, useEffect } from "react";
-import api from "../../instance/api";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getServices } from "@/services/serviceService";
+import { getClients } from "@/services/clientService";
+import api from "@/instance/api";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-const EditAppointmentModal = ({
-  isOpen,
-  onClose,
-  appointment,
-  onUpdated,
-}) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    service: "",
-    date: "",
-    time: "",
-    observations: "",
+// Assuming Appointment type is defined elsewhere or define it here
+interface Appointment {
+  id: number;
+  clientId: number;
+  serviceId: number;
+  date: string;
+  time: string;
+  observations?: string;
+  // Add other fields if necessary, like client and service objects
+}
+
+interface EditAppointmentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  appointment: Appointment | null;
+  onUpdated?: () => void;
+}
+
+const appointmentSchema = z.object({
+  clientId: z.string().min(1, "Selecione um cliente."),
+  serviceId: z.string().min(1, "Selecione um serviço."),
+  date: z.string().min(1, "A data é obrigatória."),
+  time: z.string().min(1, "A hora é obrigatória."),
+  observations: z.string().optional(),
+});
+
+type AppointmentFormData = z.infer<typeof appointmentSchema>;
+
+const EditAppointmentModal = ({ isOpen, onClose, appointment, onUpdated }: EditAppointmentModalProps) => {
+  const queryClient = useQueryClient();
+
+  const form = useForm<AppointmentFormData>({
+    resolver: zodResolver(appointmentSchema),
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   useEffect(() => {
-    if (appointment) {
-      const { name, service, date, time, observations } = appointment;
-
-      setFormData({
-        name: name || "",
-        service: service || "",
-        date: date?.split("T")[0] || "",
-        time: time || "",
-        observations: observations || "",
-      });
-    } else {
-      setFormData({
-        name: "",
-        service: "",
-        date: "",
-        time: "",
-        observations: "",
+    if (appointment && isOpen) {
+      form.reset({
+        clientId: String(appointment.clientId),
+        serviceId: String(appointment.serviceId),
+        date: appointment.date.split("T")[0], // Format date to YYYY-MM-DD
+        time: appointment.time,
+        observations: appointment.observations || "",
       });
     }
-  }, [appointment]);
+  }, [appointment, isOpen, form]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const { data: clients, isLoading: isLoadingClients } = useQuery({
+    queryKey: ["clients"],
+    queryFn: getClients,
+    enabled: isOpen,
+  });
 
-    if (!appointment?.id) {
-      toast.error("Agendamento inválido para atualização.");
-      return;
-    }
+  const { data: services, isLoading: isLoadingServices } = useQuery({
+    queryKey: ["services"],
+    queryFn: getServices,
+    enabled: isOpen,
+  });
 
-    setIsSubmitting(true);
-
-    const payload = {
-      name: formData.name.trim(),
-      service: formData.service.trim(),
-      date: formData.date,
-      time: formData.time,
-      observations: formData.observations.trim(),
-    };
-
-    try {
-      await api.put(`/agendamentos/${appointment.id}`, payload);
+  const mutation = useMutation({
+    mutationFn: (data: AppointmentFormData) => {
+      if (!appointment) throw new Error("Agendamento não selecionado.");
+      const payload = {
+        clientId: Number(data.clientId),
+        serviceId: Number(data.serviceId),
+        date: data.date,
+        time: data.time,
+        ...(data.observations && { observations: data.observations }),
+      };
+      return api.put(`/agendamentos/${appointment.id}`, payload);
+    },
+    onSuccess: () => {
       toast.success("Agendamento atualizado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
       onUpdated?.();
       onClose();
-    } catch (error) {
-      console.error("Erro ao atualizar agendamento:", error.response?.data || error.message);
-      toast.error("Erro ao atualizar agendamento.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
+    onError: (error: any) => {
+      toast.error("Erro ao atualizar agendamento", {
+        description: error.response?.data?.message || error.message,
+      });
+    },
+  });
+
+  const onSubmit = (data: AppointmentFormData) => {
+    mutation.mutate(data);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-      <div className="bg-white w-full max-w-md mx-4 p-6 rounded-2xl shadow-lg transition-all">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-[#8B5CF6]">Editar Agendamento</h2>
-          <button
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="text-sm text-red-500 hover:underline"
-          >
-            Fechar
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[480px]">
+        <DialogHeader>
+          <DialogTitle>Editar Agendamento</DialogTitle>
+          <DialogDescription>
+            Atualize os detalhes do agendamento.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <FormField
+              control={form.control}
+              name="clientId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cliente</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingClients}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um cliente..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {clients?.map((client) => (
+                        <SelectItem key={client.id} value={String(client.id)}>
+                          {client.name} ({client.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Nome do cliente"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-            className="w-full border border-[#8B5CF6]/30 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded px-3 py-2 transition"
-          />
+            <FormField
+              control={form.control}
+              name="serviceId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Serviço</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingServices}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um serviço..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {services?.map((service) => (
+                        <SelectItem key={service.id} value={String(service.id)}>
+                          {service.name} - R$ {service.price}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <input
-            type="text"
-            placeholder="Serviço"
-            value={formData.service}
-            onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-            required
-            className="w-full border border-[#8B5CF6]/30 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded px-3 py-2 transition"
-          />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hora</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-          <input
-            type="date"
-            value={formData.date}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            required
-            className="w-full border border-[#8B5CF6]/30 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded px-3 py-2 transition"
-          />
+            <FormField
+              control={form.control}
+              name="observations"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Observações</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Detalhes adicionais..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <input
-            type="time"
-            value={formData.time}
-            onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-            required
-            className="w-full border border-[#8B5CF6]/30 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded px-3 py-2 transition"
-          />
-
-          <textarea
-            placeholder="Observações"
-            value={formData.observations}
-            onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
-            className="w-full border border-[#8B5CF6]/30 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6] rounded px-3 py-2 transition resize-none"
-            rows={3}
-          />
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-white text-[#8B5CF6] border border-[#8B5CF6] hover:bg-gray-100 py-2 rounded font-medium transition"
-          >
-            {isSubmitting ? "Atualizando..." : "Atualizar Agendamento"}
-          </button>
-        </form>
-      </div>
-    </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={mutation.isPending}>
+                {mutation.isPending ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

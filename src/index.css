@@ -110,23 +110,24 @@
   background-blend-mode: screen; /* Experiment with screen, lighten, overlay */
 }
 
-@keyframes fill-text {
+@keyframes fill-up {
   from {
-    --fill-percentage: 0%;
+    background-position: 0 0%;
   }
   to {
-    --fill-percentage: 100%;
+    background-position: 0 100%;
   }
 }
 
 .workgate-fill-animation {
   color: transparent;
   -webkit-text-stroke: 1px hsl(var(--foreground)); /* Outline */
-  background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) var(--fill-percentage), transparent var(--fill-percentage), transparent 100%);
+  background-image: linear-gradient(to top, hsl(var(--primary)) 50%, transparent 50%);
+  background-size: 100% 200%;
   -webkit-background-clip: text;
   background-clip: text;
   background-repeat: no-repeat;
-  animation: fill-text 2s linear infinite alternate;
+  animation: fill-up 2s linear infinite alternate;
 }
 
 @supports (-webkit-touch-callout: none) {

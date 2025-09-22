@@ -8,6 +8,7 @@ import ClientDetailsModal from "@/components/DashboardCreditor/ClientDetailsModa
 import api from "@/instance/api";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { useOutletContext } from "react-router-dom";
 
 interface Client {
   id: number;
@@ -19,11 +20,8 @@ interface Client {
   lastAppointment?: string | null;
 }
 
-interface ClientListProps {
-  onAddClient: () => void;
-}
-
-const ClientList = ({ onAddClient }: ClientListProps) => {
+const ClientList = () => {
+  const { setIsClientModalOpen } = useOutletContext() as any;
   const [searchTerm, setSearchTerm] = useState("");
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -92,7 +90,7 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
           />
         </div>
         <Button
-          onClick={onAddClient}
+          onClick={() => setIsClientModalOpen(true)}
           variant="default"
         >
           <UserPlus className="w-4 h-4 mr-2" />
@@ -160,3 +158,4 @@ const ClientList = ({ onAddClient }: ClientListProps) => {
 };
 
 export default ClientList;
+

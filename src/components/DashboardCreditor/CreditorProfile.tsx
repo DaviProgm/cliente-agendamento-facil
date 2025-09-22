@@ -7,7 +7,12 @@ import { format } from "date-fns";
 interface Schedule {
   id: number;
   name: string;
-  service: string;
+  service: {
+    id: number;
+    name: string;
+    duration: number;
+    price: string;
+  };
   date: string;
   time: string;
   observations?: string;
@@ -48,7 +53,7 @@ export default function CreditorProfile({ providerId, providerName, providerEmai
 
         return {
           id: schedule.id.toString(),
-          title: schedule.service,
+          title: schedule.service.name,
           startTime,
           endTime,
           description: schedule.observations,
@@ -79,4 +84,5 @@ export default function CreditorProfile({ providerId, providerName, providerEmai
     </div>
   );
 }
+
 

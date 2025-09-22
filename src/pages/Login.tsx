@@ -5,7 +5,7 @@ const Login = () => {
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
       <div className="flex flex-col items-center justify-center galactic-background p-8 sm:p-12 text-foreground">
         <div className="flex flex-col items-center text-center">
-          <img src="/logo.png" alt="Logo Workgate" className="h-32 sm:h-48 object-contain mb-4" />
+                    <img src="/logo.png" alt="Logo Workgate" className="h-32 sm:h-48 object-contain mb-4 " />
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight drop-shadow-md">
             WORKGATE
           </h1>

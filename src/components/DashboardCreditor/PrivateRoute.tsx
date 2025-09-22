@@ -50,8 +50,10 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-background text-foreground">
-        <p>Verificando assinatura...</p>
+      <div className="fixed inset-0 flex flex-col justify-center items-center bg-background/80 backdrop-blur-sm z-50">
+        <div className="text-6xl font-extrabold tracking-widest workgate-fill-animation">
+          WORKGATE
+        </div>
       </div>
     );
   }

@@ -25,7 +25,12 @@ const SupportBubble = () => {
 
     try {
       const response = await api.post("/support-tickets", { subject, message });
-      toast.success(response.data.message || "Chamado enviado com sucesso!");
+      if (response.data.whatsappUrl) {
+        window.open(response.data.whatsappUrl, '_blank');
+        toast.success("Você será redirecionado para o WhatsApp para continuar seu suporte.");
+      } else {
+        toast.success(response.data.message || "Chamado enviado com sucesso!");
+      }
       setSubject("");
       setMessage("");
       setIsOpen(false);

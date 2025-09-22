@@ -1,34 +1,57 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, BarChart3, LogOut, AlignJustify, User } from "lucide-react";
+import { Calendar, Users, BarChart3, LogOut, AlignJustify, User, Wrench, Clock } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 interface SidebarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
   onLogout: () => void;
   onToggleSidebar?: () => void;
 }
 
-const Sidebar = ({ activeTab, setActiveTab, onLogout, onToggleSidebar }: SidebarProps) => {
+const Sidebar = ({ onLogout, onToggleSidebar }: SidebarProps) => {
+  const location = useLocation();
+
   const menuItems = [
     {
       id: "overview",
       label: "Visão Geral",
       icon: BarChart3,
+      path: "/dashboard",
     },
     {
       id: "clients",
       label: "Clientes",
       icon: Users,
+      path: "/dashboard/clients",
     },
     {
       id: "appointments",
       label: "Agendamentos",
       icon: Calendar,
+      path: "/dashboard/appointments",
+    },
+    {
+      id: "services",
+      label: "Meus Serviços",
+      icon: Wrench,
+      path: "/dashboard/services",
     },
     {
       id: "profile",
       label: "Meu Perfil",
       icon: User,
+      path: "/dashboard/profile",
+    },
+    {
+      id: "my-hours",
+      label: "Meus Horários",
+      icon: Clock,
+      path: "/dashboard/my-hours",
+    },
+    {
+      id: "subscription",
+      label: "Assinatura",
+      icon: User, // You might want to change this icon
+      path: "/dashboard/subscription",
     },
   ];
 
@@ -47,11 +70,11 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, onToggleSidebar }: Sidebar
       <nav className="flex-1 py-4">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id;
+          const isActive = location.pathname === item.path;
           return (
-            <button
+            <Link
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              to={item.path}
               className={`w-full flex items-center px-4 py-3 text-left rounded-md transition-colors duration-200 ${
                 isActive
                   ? "bg-primary/10 text-primary font-semibold"
@@ -60,7 +83,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, onToggleSidebar }: Sidebar
             >
               <Icon className={`w-5 h-5 mr-3 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
               <span className="truncate text-sm">{item.label}</span>
-            </button>
+            </Link>
           );
         })}
       </nav>

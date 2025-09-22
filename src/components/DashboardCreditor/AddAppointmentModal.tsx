@@ -1,5 +1,36 @@
-import React, { useState, useEffect } from "react";
-import api from "../../instance/api";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getServices } from "@/services/serviceService";
+import { getClients } from "@/services/clientService"; // Assuming clientService.ts exists
+import api from "@/instance/api";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 interface AddAppointmentModalProps {
@@ -8,166 +39,181 @@ interface AddAppointmentModalProps {
   onCreated?: (appointment: any) => void;
 }
 
+const appointmentSchema = z.object({
+  clientId: z.string().min(1, "Selecione um cliente."),
+  serviceId: z.string().min(1, "Selecione um serviço."),
+  date: z.string().min(1, "A data é obrigatória."),
+  time: z.string().min(1, "A hora é obrigatória."),
+  observations: z.string().optional(),
+});
+
+type AppointmentFormData = z.infer<typeof appointmentSchema>;
+
 const AddAppointmentModal = ({ isOpen, onClose, onCreated }: AddAppointmentModalProps) => {
-  const [clients, setClients] = useState([]);
-  const [formData, setFormData] = useState({
-    clientId: 0,
-    service: "",
-    date: "",
-    time: "",
-    observations: "",
+  const queryClient = useQueryClient();
+
+  const form = useForm<AppointmentFormData>({
+    resolver: zodResolver(appointmentSchema),
+    defaultValues: { clientId: "", serviceId: "", date: "", time: "", observations: "" },
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      api.get("/clientes")
-        .then((res) => setClients(res.data))
-        .catch(() => setClients([]));
-    }
-  }, [isOpen]);
+  const { data: clients, isLoading: isLoadingClients } = useQuery({
+    queryKey: ["clients"],
+    queryFn: getClients,
+    enabled: isOpen, // Only fetch when the modal is open
+  });
 
-  if (!isOpen) return null;
+  const { data: services, isLoading: isLoadingServices } = useQuery({
+    queryKey: ["services"],
+    queryFn: getServices,
+    enabled: isOpen, // Only fetch when the modal is open
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "clientId" ? Number(value) : value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.clientId) {
-      toast.error("Selecione um cliente.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await api.post("/agendamentos", formData, {
-        headers: { "Content-Type": "application/json" },
-      });
-
+  const mutation = useMutation({
+    mutationFn: (data: AppointmentFormData) => {
+        const payload = {
+            clientId: Number(data.clientId),
+            serviceId: Number(data.serviceId),
+            date: data.date,
+            time: data.time,
+            ...(data.observations && { observations: data.observations }),
+        };
+        return api.post("/agendamentos", payload);
+    },
+    onSuccess: (response) => {
       toast.success("Agendamento criado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
       onCreated?.(response.data.schedule);
-      setFormData({ clientId: 0, service: "", date: "", time: "", observations: "" });
       onClose();
-    } catch (error: any) {
-      toast.error(
-        "Erro ao criar agendamento: " +
-        (error.response?.data?.message || error.message)
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+      form.reset();
+    },
+    onError: (error: any) => {
+      toast.error("Erro ao criar agendamento", {
+        description: error.response?.data?.message || error.message,
+      });
+    },
+  });
+
+  const onSubmit = (data: AppointmentFormData) => {
+    mutation.mutate(data);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-xl border border-[#8B5CF6] p-6">
-        <h2 className="text-xl font-semibold text-[#8B5CF6] mb-4">Novo Agendamento</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
-              Cliente *
-            </label>
-            <select
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[480px]">
+        <DialogHeader>
+          <DialogTitle>Novo Agendamento</DialogTitle>
+          <DialogDescription>
+            Selecione o cliente, o serviço e a data/hora.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <FormField
+              control={form.control}
               name="clientId"
-              value={formData.clientId}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
-            >
-              <option value={0} disabled>Selecione um cliente</option>
-              {clients.map((c: any) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.email})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
-              Serviço *
-            </label>
-            <input
-              type="text"
-              name="service"
-              value={formData.service}
-              onChange={handleChange}
-              required
-              placeholder="Ex: Consulta, Corte, Reunião"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cliente</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingClients}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um cliente..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {clients?.map((client) => (
+                        <SelectItem key={client.id} value={String(client.id)}>
+                          {client.name} ({client.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="flex space-x-2">
-            <div className="flex-1">
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Data *
-              </label>
-              <input
-                type="date"
+            <FormField
+              control={form.control}
+              name="serviceId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Serviço</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingServices}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um serviço..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {services?.map((service) => (
+                        <SelectItem key={service.id} value={String(service.id)}>
+                          {service.name} - R$ {service.price}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
                 name="date"
-                value={formData.date}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="flex-1">
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Hora *
-              </label>
-              <input
-                type="time"
+              <FormField
+                control={form.control}
                 name="time"
-                value={formData.time}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hora</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
 
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
-              Observações
-            </label>
-            <textarea
+            <FormField
+              control={form.control}
               name="observations"
-              value={formData.observations}
-              onChange={handleChange}
-              placeholder="Ex: Levar documentos, preferir horários pela manhã..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Observações</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Detalhes adicionais..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="flex flex-col gap-2 pt-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-[#8B5CF6] hover:bg-[#7a4fe6] text-white py-2 rounded-lg transition-all"
-            >
-              {isSubmitting ? "Salvando..." : "Salvar Agendamento"}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={mutation.isPending}>
+                {mutation.isPending ? "Salvando..." : "Salvar Agendamento"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../instance/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,15 +8,31 @@ import { toast } from "@/hooks/use-toast";
 import EditAppointmentModal from "./EditAppointmentmodal";
 import { Calendar, Search } from "lucide-react";
 import { motion } from "framer-motion";
+import { useOutletContext } from "react-router-dom";
+
+interface Service {
+  id: number;
+  name: string;
+  duration: number;
+  price: string;
+}
+
+interface Client {
+  id: number;
+  name: string;
+  email?: string;
+}
 
 interface Appointment {
   id: number;
-  name: string;
-  service: string;
   date: string;
   time: string;
   observations?: string;
-  status?: "agendado" | "concluído" | "cancelado" | string;
+  status?: string;
+  client: Client;
+  service: Service;
+  clientId: number;
+  serviceId: number;
 }
 
 const statusOptions = [
@@ -26,16 +43,24 @@ const statusOptions = [
   "cancelado",
 ];
 
-interface AppointmentListProps {
-  onAddAppointment: () => void;
-  refreshFlag: boolean;
-}
-
-const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, refreshFlag }) => {
+const AppointmentList: React.FC = () => {
+  const { setIsAppointmentModalOpen } = useOutletContext() as any;
   const [searchTerm, setSearchTerm] = useState("");
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const queryClient = useQueryClient();
+
+  const { data: appointments = [], isLoading, isError, refetch } = useQuery<Appointment[]>({
+    queryKey: ["appointments"],
+    queryFn: async () => {
+      const res = await api.get("/agendamentos");
+      if (!Array.isArray(res.data)) {
+        toast({ title: "Erro", description: "Resposta inválida da API.", variant: "destructive" });
+        return [];
+      }
+      return res.data.map((item: any) => ({ ...item, status: item.status ?? "agendado" }));
+    }
+  });
 
   const formatDateToBR = (dateString: string) => {
     if (!dateString) return "";
@@ -43,30 +68,9 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
     return `${day}/${month}/${year}`;
   };
 
-  const fetchAppointments = useCallback(async () => {
-    try {
-      const res = await api.get("/agendamentos");
-      if (!Array.isArray(res.data)) {
-        toast({ title: "Erro", description: "Resposta inválida da API.", variant: "destructive" });
-        return;
-      }
-      const dataWithStatus = res.data.map((item: Appointment) => ({
-        ...item,
-        status: item.status ?? "agendado",
-      }));
-      setAppointments(dataWithStatus);
-    } catch (error) {
-      toast({ title: "Erro", description: "Não foi possível carregar os agendamentos.", variant: "destructive" });
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchAppointments();
-  }, [fetchAppointments, refreshFlag]);
-
   const filteredAppointments = appointments.filter((appointment) =>
-    appointment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.service.toLowerCase().includes(searchTerm.toLowerCase())
+    (appointment.client?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (appointment.service?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
 
   const statusStyles: { [key: string]: string } = {
@@ -78,22 +82,10 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
   const handleStatusChange = async (appointmentId: number, newStatus: string) => {
     try {
       await api.put(`/agendamentos/${appointmentId}/status`, { status: newStatus });
-      setAppointments((prev) => prev.map((a) => a.id === appointmentId ? { ...a, status: newStatus } : a));
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
       toast({ title: "Status atualizado", description: `O agendamento foi marcado como \"${newStatus}\".` });
     } catch {
       toast({ title: "Erro ao atualizar status", description: "Tente novamente.", variant: "destructive" });
-    }
-  };
-
-  const handleCompleteAppointment = async (id: number) => {
-    const ap = appointments.find((a) => a.id === id);
-    if (!ap) return toast({ title: "Erro", description: "Agendamento não encontrado.", variant: "destructive" });
-    try {
-      await api.delete(`/agendamentos/${id}`);
-      setAppointments((prev) => prev.filter((a) => a.id !== id));
-      toast({ title: "Concluído!", description: `O agendamento de ${ap.name} foi concluído.` });
-    } catch {
-      toast({ title: "Erro ao concluir", description: "Não foi possível excluir.", variant: "destructive" });
     }
   };
 
@@ -105,8 +97,21 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
   const handleUpdated = () => {
     setIsEditModalOpen(false);
     setSelectedAppointment(null);
-    fetchAppointments();
+    queryClient.invalidateQueries({ queryKey: ["appointments"] });
   };
+
+  const handleCompleteAppointment = async (appointmentId: number) => {
+    try {
+      await api.put(`/agendamentos/${appointmentId}/status`, { status: "concluído" });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      toast({ title: "Agendamento concluído", description: "O agendamento foi marcado como concluído." });
+    } catch {
+      toast({ title: "Erro ao concluir agendamento", description: "Tente novamente.", variant: "destructive" });
+    }
+  };
+
+  if (isLoading) return <div>Carregando agendamentos...</div>;
+  if (isError) return <div>Erro ao carregar agendamentos.</div>;
 
   return (
     <>
@@ -115,13 +120,13 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder="Buscar agendamentos..."
+              placeholder="Buscar por cliente ou serviço..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 placeholder:text-muted-foreground"
             />
           </div>
-          <Button onClick={onAddAppointment} variant="default">
+          <Button onClick={() => setIsAppointmentModalOpen(true)} variant="default">
             <Calendar className="w-4 h-4 mr-2" /> Novo Agendamento
           </Button>
         </div>
@@ -138,9 +143,10 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ onAddAppointment, ref
                 <CardHeader className="pb-3">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg truncate text-primary">{appointment.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{appointment.service}</p>
+                      <CardTitle className="text-lg truncate text-primary">{appointment.client.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{appointment.service.name}</p>
                     </div>
+
                     <select
                       value={appointment.status}
                       onChange={(e) => handleStatusChange(appointment.id, e.target.value)}
