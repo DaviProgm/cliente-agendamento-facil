@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -88,135 +88,137 @@ const BookingPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <header className="flex items-center gap-4 mb-8">
-        <Avatar className="h-24 w-24">
-          <AvatarImage src={providerData?.profilePicture} alt={providerData?.name} />
-          <AvatarFallback>{providerData?.name?.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div>
-          <h1 className="text-3xl font-bold">{providerData?.name}</h1>
-          <p className="text-muted-foreground mt-1">{providerData?.bio}</p>
-        </div>
-      </header>
+    <div style={{ backgroundColor: providerData?.cor_perfil || '#FFFFFF', minHeight: '100vh' }} className="transition-colors duration-500">
+      <div className="container mx-auto p-4 sm:p-6">
+        <header className="flex items-center gap-4 mb-8">
+          <Avatar className="h-24 w-24">
+            <AvatarImage src={providerData?.foto_perfil_url} alt={providerData?.name} />
+            <AvatarFallback>{providerData?.name?.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="text-3xl font-bold">{providerData?.name}</h1>
+            <p className="text-muted-foreground mt-1">{providerData?.bio}</p>
+          </div>
+        </header>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1 space-y-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>1. Selecione um Serviço</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {providerData?.services.map((service: any) => (
-                <div
-                  key={service.id}
-                  onClick={() => setSelectedService(service)}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedService?.id === service.id ? 'border-primary bg-primary/10 shadow-lg' : 'bg-card hover:bg-muted/50'}`}>
-                  <h3 className="font-semibold">{service.name}</h3>
-                  <p className="text-sm text-muted-foreground">Duração: {service.duration} min | Preço: R$ {service.price}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className={`lg:col-span-2 space-y-8 transition-opacity duration-500 ${selectedService ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
-          <Card>
-            <CardHeader>
-              <CardTitle>2. Selecione uma Data e Horário</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col sm:flex-row gap-8">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                className="rounded-md border self-start"
-                disabled={(date) => date < new Date(new Date().toDateString())}
-              />
-              <div className="w-full">
-                <h3 className="font-semibold mb-4 text-center sm:text-left">Horários disponíveis para {selectedDate ? format(selectedDate, 'dd/MM') : ''}</h3>
-                {isLoadingAvailability ? (
-                  <div className="flex justify-center items-center h-32"><Loader2 className="h-6 w-6 animate-spin" /></div>
-                ) : (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {availability?.length > 0 ? availability.map((slot: string) => (
-                      <Button
-                        key={slot}
-                        variant={selectedSlot === slot ? 'default' : 'outline'}
-                        onClick={() => setSelectedSlot(slot)}>
-                        {slot}
-                      </Button>
-                    )) : <p className="text-sm text-muted-foreground col-span-full text-center">Nenhum horário disponível para esta data.</p>}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {selectedSlot && (
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1 space-y-8">
             <Card>
               <CardHeader>
-                <CardTitle>3. Preencha seus dados para confirmar</CardTitle>
+                <CardTitle>1. Selecione um Serviço</CardTitle>
               </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="clientName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome Completo</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Seu nome" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="clientEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="seu@email.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="clientPhone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Telefone</FormLabel>
-                          <FormControl>
-                            <Input placeholder="(XX) XXXXX-XXXX" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" disabled={mutation.isPending} className="w-full">
-                      {mutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Agendando...</> : 'Confirmar Agendamento'}
-                    </Button>
-                  </form>
-                </Form>
+              <CardContent className="space-y-2">
+                {providerData?.services.map((service: any) => (
+                  <div
+                    key={service.id}
+                    onClick={() => setSelectedService(service)}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedService?.id === service.id ? 'border-primary bg-primary/10 shadow-lg' : 'bg-card hover:bg-muted/50'}`}>
+                    <h3 className="font-semibold">{service.name}</h3>
+                    <p className="text-sm text-muted-foreground">Duração: {service.duration} min | Preço: R$ {service.price}</p>
+                  </div>
+                ))}
               </CardContent>
             </Card>
-          )}
-        </div>
-      </div>
+          </div>
 
-      <div className="mt-12 p-6 bg-card border rounded-lg text-center">
-        <h2 className="text-xl font-bold mb-2">Faça seu próprio link de agendamento!</h2>
-        <p className="text-muted-foreground mb-4">Crie sua página personalizada e gerencie seus agendamentos de forma fácil e eficiente.</p>
-        <Button asChild>
-          <Link to="/register">Comece Agora!</Link>
-        </Button>
+          <div className={`lg:col-span-2 space-y-8 transition-opacity duration-500 ${selectedService ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+            <Card>
+              <CardHeader>
+                <CardTitle>2. Selecione uma Data e Horário</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col sm:flex-row gap-8">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  className="rounded-md border self-start"
+                  disabled={(date) => date < new Date(new Date().toDateString())}
+                />
+                <div className="w-full">
+                  <h3 className="font-semibold mb-4 text-center sm:text-left">Horários disponíveis para {selectedDate ? format(selectedDate, 'dd/MM') : ''}</h3>
+                  {isLoadingAvailability ? (
+                    <div className="flex justify-center items-center h-32"><Loader2 className="h-6 w-6 animate-spin" /></div>
+                  ) : (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {availability?.length > 0 ? availability.map((slot: string) => (
+                        <Button
+                          key={slot}
+                          variant={selectedSlot === slot ? 'default' : 'outline'}
+                          onClick={() => setSelectedSlot(slot)}>
+                          {slot}
+                        </Button>
+                      )) : <p className="text-sm text-muted-foreground col-span-full text-center">Nenhum horário disponível para esta data.</p>}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {selectedSlot && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>3. Preencha seus dados para confirmar</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="clientName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nome Completo</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Seu nome" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="clientEmail"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="seu@email.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="clientPhone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Telefone</FormLabel>
+                            <FormControl>
+                              <Input placeholder="(XX) XXXXX-XXXX" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit" disabled={mutation.isPending} className="w-full">
+                        {mutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Agendando...</> : 'Confirmar Agendamento'}
+                      </Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-12 p-6 bg-card border rounded-lg text-center">
+          <h2 className="text-xl font-bold mb-2">Faça seu próprio link de agendamento!</h2>
+          <p className="text-muted-foreground mb-4">Crie sua página personalizada e gerencie seus agendamentos de forma fácil e eficiente.</p>
+          <Button asChild>
+            <Link to="/register">Comece Agora!</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

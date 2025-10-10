@@ -1,26 +1,61 @@
-import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
 import { getWorkHours, saveWorkHours } from '@/services/workHoursService';
 import { setDefaultWorkHours } from '@/services/userService';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
-const daysOfWeek = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+interface WorkHour {
+  dayOfWeek: number;
+  isAvailable: boolean;
+  startTime: string;
+  endTime: string;
+}
+
+const weekDays = [
+  "Domingo",
+  "Segunda-feira",
+  "Terça-feira",
+  "Quarta-feira",
+  "Quinta-feira",
+  "Sexta-feira",
+  "Sábado",
+];
 
 const MyHoursPage = () => {
   const queryClient = useQueryClient();
-  const [workHours, setWorkHours] = useState<any[]>([]);
+  const [workHours, setWorkHours] = useState<WorkHour[]>([]);
 
-  const { data, isLoading, isError } = useQuery({ queryKey: ['workHours'], queryFn: getWorkHours });
+  const { data: fetchedWorkHours, isLoading, isError } = useQuery({
+    queryKey: ['workHours'],
+    queryFn: getWorkHours,
+  });
+
+  const { data: profileData } = useQuery<{ id: string }>({ queryKey: ['profile'] });
 
   useEffect(() => {
-    if (data) {
-      const sortedData = [...data].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
-      setWorkHours(sortedData);
+    const initialWorkHours = weekDays.map((_, index) => ({
+      dayOfWeek: index,
+      isAvailable: false,
+      startTime: '09:00',
+      endTime: '18:00',
+    }));
+
+    if (fetchedWorkHours) {
+      const mergedHours = initialWorkHours.map(day => {
+        const fetchedDay = fetchedWorkHours.find(h => h.dayOfWeek === day.dayOfWeek);
+        return fetchedDay ? { ...day, ...fetchedDay } : day;
+      });
+      setWorkHours(mergedHours);
+    } else {
+      setWorkHours(initialWorkHours);
     }
-  }, [data]);
+  }, [fetchedWorkHours]);
 
   const saveMutation = useMutation({
     mutationFn: saveWorkHours,
@@ -29,92 +64,119 @@ const MyHoursPage = () => {
       queryClient.invalidateQueries({ queryKey: ['workHours'] });
     },
     onError: (error) => {
-      console.error('Error saving work hours:', error);
-      toast.error('Erro ao salvar horários.', { description: error.message });
+      toast.error('Erro ao salvar os horários.', { description: error.message });
     },
   });
 
-  const setDefaultMutation = useMutation({
-    mutationFn: setDefaultWorkHours,
+  const defaultHoursMutation = useMutation({
+    mutationFn: () => setDefaultWorkHours(profileData!.id),
     onSuccess: () => {
-      toast.success('Agenda redefinida para o padrão com sucesso!');
+      toast.success('Horários padrão restaurados com sucesso!');
       queryClient.invalidateQueries({ queryKey: ['workHours'] });
     },
     onError: (error) => {
-      console.error('Error setting default work hours:', error);
-      toast.error('Erro ao redefinir agenda para o padrão.', { description: error.message });
+      toast.error('Erro ao restaurar os horários.', { description: error.message });
     },
   });
 
-  const handleSave = () => {
-    console.log('Saving work hours:', workHours);
+  const handleHourChange = (dayOfWeek: number, field: keyof WorkHour, value: string | boolean) => {
+    setWorkHours(currentHours =>
+      currentHours.map(hour =>
+        hour.dayOfWeek === dayOfWeek ? { ...hour, [field]: value } : hour
+      )
+    );
+  };
+
+  const handleSubmit = () => {
     saveMutation.mutate(workHours);
   };
 
   const handleSetDefault = () => {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      setDefaultMutation.mutate(userId);
+    if (profileData?.id) {
+      defaultHoursMutation.mutate();
     } else {
-      toast.error("ID do usuário não encontrado.");
+      toast.error("Não foi possível identificar o usuário para restaurar os horários.");
     }
   };
 
-  const handleWorkHourChange = (dayIndex: number, field: string, value: any) => {
-    const updatedWorkHours = [...workHours];
-    updatedWorkHours[dayIndex] = { ...updatedWorkHours[dayIndex], [field]: value };
-    setWorkHours(updatedWorkHours);
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
-  if (isLoading) return <div>Carregando horários...</div>;
-  if (isError) return <div>Erro ao carregar horários.</div>;
+  if (isError) {
+    return <div className="text-red-500">Erro ao carregar os horários de trabalho.</div>;
+  }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h1 className="text-2xl font-bold mb-2 sm:mb-0">Meus Horários</h1>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button onClick={handleSetDefault} disabled={setDefaultMutation.isPending} className="w-full sm:w-auto">
-            {setDefaultMutation.isPending ? 'Redefinindo...' : 'Redefinir para Agenda Padrão'}
-          </Button>
-          <Button onClick={handleSave} disabled={saveMutation.isPending} className="w-full sm:w-auto">
-            {saveMutation.isPending ? 'Salvando...' : 'Salvar Horários'}
-          </Button>
-        </div>
-      </div>
-      <div className="space-y-4">
-        {workHours.map((day, index) => (
-          <div key={index} className="p-4 border rounded-lg bg-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className='flex items-center gap-4'>
-              <Checkbox
-                id={`isAvailable-${index}`}
-                checked={day.isAvailable}
-                onCheckedChange={(checked) => handleWorkHourChange(index, 'isAvailable', checked)}
-              />
-              <label htmlFor={`isAvailable-${index}`} className='text-lg font-medium sm:w-32'>{daysOfWeek[day.dayOfWeek]}</label>
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Meus Horários</CardTitle>
+          <CardDescription>
+            Defina seus dias e horários de trabalho. Os clientes só poderão agendar nos horários disponíveis.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {workHours.map(({ dayOfWeek, isAvailable, startTime, endTime }) => (
+            <div key={dayOfWeek} className="p-4 border rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <Switch
+                  id={`available-${dayOfWeek}`}
+                  checked={isAvailable}
+                  onCheckedChange={(checked) => handleHourChange(dayOfWeek, 'isAvailable', checked)}
+                />
+                <Label htmlFor={`available-${dayOfWeek}`} className="w-28 font-medium">
+                  {weekDays[dayOfWeek]}
+                </Label>
+              </div>
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <Input
+                  type="time"
+                  value={startTime}
+                  disabled={!isAvailable}
+                  onChange={(e) => handleHourChange(dayOfWeek, 'startTime', e.target.value)}
+                  className="w-full sm:w-auto"
+                />
+                <span className="text-muted-foreground">até</span>
+                <Input
+                  type="time"
+                  value={endTime}
+                  disabled={!isAvailable}
+                  onChange={(e) => handleHourChange(dayOfWeek, 'endTime', e.target.value)}
+                  className="w-full sm:w-auto"
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-4 w-full sm:w-auto">
-              <Input
-                type="time"
-                value={day.startTime}
-                disabled={!day.isAvailable}
-                onChange={(e) => handleWorkHourChange(index, 'startTime', e.target.value)}
-                className="w-full sm:w-32"
-              />
-              <span>-</span>
-              <Input
-                type="time"
-                value={day.endTime}
-                disabled={!day.isAvailable}
-                onChange={(e) => handleWorkHourChange(index, 'endTime', e.target.value)}
-                className="w-full sm:w-32"
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </CardContent>
+        <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 border-t pt-6">
+          <Button 
+            variant="outline" 
+            onClick={handleSetDefault} 
+            disabled={defaultHoursMutation.isPending || !profileData?.id}
+          >
+            {defaultHoursMutation.isPending ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Restaurando...</>
+            ) : (
+              "Restaurar Padrão"
+            )}
+          </Button>
+          <Button onClick={handleSubmit} disabled={saveMutation.isPending}>
+            {saveMutation.isPending ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</>
+            ) : (
+              "Salvar Horários"
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
 
 export default MyHoursPage;
+
