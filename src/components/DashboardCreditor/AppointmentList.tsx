@@ -1,14 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../instance/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import EditAppointmentModal from "./EditAppointmentmodal";
 import { Calendar, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import { useOutletContext } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Service {
   id: number;
@@ -46,11 +54,12 @@ const statusOptions = [
 const AppointmentList: React.FC = () => {
   const { setIsAppointmentModalOpen } = useOutletContext() as any;
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCompleted, setShowCompleted] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: appointments = [], isLoading, isError, refetch } = useQuery<Appointment[]>({
+  const { data: appointments = [], isLoading, isError } = useQuery<Appointment[]>({
     queryKey: ["appointments"],
     queryFn: async () => {
       const res = await api.get("/agendamentos");
@@ -68,15 +77,19 @@ const AppointmentList: React.FC = () => {
     return `${day}/${month}/${year}`;
   };
 
-  const filteredAppointments = appointments.filter((appointment) =>
-    (appointment.client?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-    (appointment.service?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-  );
+  const filteredAppointments = appointments
+    .filter(appointment => showCompleted ? true : appointment.status !== 'concluído')
+    .filter((appointment) =>
+      (appointment.client?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (appointment.service?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+    );
 
   const statusStyles: { [key: string]: string } = {
-    agendado: "bg-card text-primary border-primary",
-    concluído: "bg-secondary text-secondary-foreground border-secondary",
-    cancelado: "bg-destructive text-destructive-foreground border-destructive",
+    agendado: "bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30",
+    confirmado: "bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30",
+    'em andamento': "bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/30",
+    concluído: "bg-vibrant-accent/20 text-vibrant-accent border-vibrant-accent/30 hover:bg-vibrant-accent/30",
+    cancelado: "bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30",
   };
 
   const handleStatusChange = async (appointmentId: number, newStatus: string) => {
@@ -100,33 +113,37 @@ const AppointmentList: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ["appointments"] });
   };
 
-  const handleCompleteAppointment = async (appointmentId: number) => {
-    try {
-      await api.put(`/agendamentos/${appointmentId}/status`, { status: "concluído" });
-      queryClient.invalidateQueries({ queryKey: ["appointments"] });
-      toast({ title: "Agendamento concluído", description: "O agendamento foi marcado como concluído." });
-    } catch {
-      toast({ title: "Erro ao concluir agendamento", description: "Tente novamente.", variant: "destructive" });
-    }
-  };
-
-  if (isLoading) return <div>Carregando agendamentos...</div>;
-  if (isError) return <div>Erro ao carregar agendamentos.</div>;
+  if (isLoading) return <div className="text-center p-10 text-soft-text">Carregando agendamentos...</div>;
+  if (isError) return <div className="text-center p-10 text-red-400">Erro ao carregar agendamentos.</div>;
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-soft-text w-4 h-4" />
             <Input
               placeholder="Buscar por cliente ou serviço..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 placeholder:text-muted-foreground"
+              className="pl-10 bg-main-background border-gradient-end focus:ring-vibrant-accent text-light-text placeholder:text-soft-text"
             />
           </div>
-          <Button onClick={() => setIsAppointmentModalOpen(true)} variant="default">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="show-completed" 
+              checked={showCompleted} 
+              onCheckedChange={(checked) => setShowCompleted(!!checked)}
+              className="border-soft-text/50 data-[state=checked]:bg-vibrant-accent data-[state=checked]:text-light-text"
+            />
+            <label
+              htmlFor="show-completed"
+              className="text-sm font-medium leading-none text-soft-text peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Mostrar concluídos
+            </label>
+          </div>
+          <Button onClick={() => setIsAppointmentModalOpen(true)} className="bg-vibrant-accent text-light-text hover:bg-vibrant-accent/90">
             <Calendar className="w-4 h-4 mr-2" /> Novo Agendamento
           </Button>
         </div>
@@ -139,55 +156,52 @@ const AppointmentList: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+              <Card className="bg-black/40 backdrop-blur-md rounded-2xl shadow-lg border border-white/10">
+                <CardHeader className="pb-4">
+                  <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg truncate text-primary">{appointment.client.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{appointment.service.name}</p>
+                      <CardTitle className="text-lg font-semibold truncate text-light-text">{appointment.client.name}</CardTitle>
+                      <p className="text-sm text-soft-text">{appointment.service.name}</p>
                     </div>
-
-                    <select
-                      value={appointment.status}
-                      onChange={(e) => handleStatusChange(appointment.id, e.target.value)}
-                      className={`text-sm rounded px-2 py-1 border focus:outline-none focus:ring-2 focus:ring-primary ${statusStyles[appointment.status || 'agendado'] || 'bg-muted text-muted-foreground border-border'}`}
-                    >
-                      {statusOptions.map((status) => (
-                        <option key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </option>
-                      ))}
-                    </select>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Badge className={`cursor-pointer ${statusStyles[appointment.status || 'agendado']}`}>
+                          {appointment.status?.charAt(0).toUpperCase() + appointment.status?.slice(1)}
+                        </Badge>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-main-background border-gradient-end text-light-text">
+                        {statusOptions.map((status) => (
+                          <DropdownMenuItem
+                            key={status}
+                            onSelect={() => handleStatusChange(appointment.id, status)}
+                            className="focus:bg-gradient-end focus:text-white"
+                          >
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-base font-medium text-light-text">
                         {formatDateToBR(appointment.date)} às {appointment.time}
                       </p>
                       {appointment.observations && (
-                        <p className="text-sm text-muted-foreground mt-1">{appointment.observations}</p>
+                        <p className="text-sm text-soft-text mt-1 max-w-xs truncate">{appointment.observations}</p>
                       )}
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="flex items-center gap-2">
                       <Button
-                        variant="secondary"
+                        variant="outline"
                         size="sm"
                         onClick={() => handleEditClick(appointment)}
+                        className="bg-transparent border-soft-text/50 text-soft-text hover:bg-soft-text/10 hover:text-light-text"
                       >
                         Editar
                       </Button>
-
-                      {appointment.status === "agendado" && (
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleCompleteAppointment(appointment.id)}
-                        >
-                          Concluir
-                        </Button>
-                      )}
                     </div>
                   </div>
                 </CardContent>

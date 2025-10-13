@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Users } from "lucide-react";
 import WeeklyReport from "./WeeklyReport";
 import CreditorProfile from "./CreditorProfile";
+import CompletedAppointments from "./CompletedAppointments";
 import React, { useState, useEffect } from "react";
 
 
@@ -110,41 +111,45 @@ const Overview = () => {
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
+        <Card className="bg-black/40 backdrop-blur-md rounded-2xl shadow-lg transition-transform hover:scale-105 border border-white/10">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
-            <Users className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium text-soft-text">Total de Clientes</CardTitle>
+            <Users className="h-5 w-5 text-vibrant-accent" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalClientes || 0}</div>
-            <p className="text-xs text-muted-foreground">+2 novos este mês</p>
+            <div className="text-4xl font-bold text-light-text">{totalClientes || 0}</div>
+            <p className="text-xs text-soft-text">+2 novos este mês</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-black/40 backdrop-blur-md rounded-2xl shadow-lg transition-transform hover:scale-105 border border-white/10">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Agendamentos Hoje</CardTitle>
-            <Calendar className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium text-soft-text">Agendamentos Hoje</CardTitle>
+            <Calendar className="h-5 w-5 text-vibrant-accent" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{agendamentosHoje}</div>
-            <p className="text-xs text-muted-foreground">pendentes</p>
+            <div className="text-4xl font-bold text-light-text">{agendamentosHoje}</div>
+            <p className="text-xs text-soft-text">pendentes</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-black/40 backdrop-blur-md rounded-2xl shadow-lg transition-transform hover:scale-105 border border-white/10">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Agendamentos Mês</CardTitle>
-            <Calendar className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium text-soft-text">Agendamentos Mês</CardTitle>
+            <Calendar className="h-5 w-5 text-vibrant-accent" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{agendamentosMes}</div>
-            <p className="text-xs text-muted-foreground">+12% em relação ao mês anterior</p>
+            <div className="text-4xl font-bold text-light-text">{agendamentosMes}</div>
+            <p className="text-xs text-soft-text">+12% em relação ao mês anterior</p>
           </CardContent>
         </Card>
       </div>
-      <WeeklyReport />
-      {providerId && <CreditorProfile providerId={providerId} />}
+      <div className="grid grid-cols-1 gap-6">
+        <WeeklyReport />
+        {providerId && (
+          <CreditorProfile providerId={providerId} />
+        )}
+      </div>
     </div>
   );
 };

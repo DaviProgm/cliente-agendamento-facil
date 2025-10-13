@@ -32,6 +32,7 @@ import ClientList from "./components/DashboardCreditor/ClientList";
 import AppointmentList from "./components/DashboardCreditor/AppointmentList";
 import ServicesPage from "./components/DashboardCreditor/ServicesPage";
 import Assinatura from "./pages/Assinatura";
+import CalendarPage from "./pages/CalendarPage";
 
 const queryClient = new QueryClient();
 

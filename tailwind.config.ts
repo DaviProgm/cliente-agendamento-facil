@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 export default {
 	darkMode: ["class"],
@@ -18,7 +19,16 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ["Inter", ...fontFamily.sans],
+			},
 			colors: {
+				'main-background': '#0B0B0D',
+				'gradient-start': '#1B0E2A',
+				'gradient-end': '#4B0E7A',
+				'vibrant-accent': '#6E00FF',
+				'light-text': '#E6E6E9',
+				'soft-text': '#A0A0B0',
         'galactic-dark': '#0B0B0D',
         'galactic-indigo': '#8A2BE2',
         'galactic-blue': '#00BFFF',
@@ -67,6 +77,7 @@ export default {
 				}
 			},
 			borderRadius: {
+				'2xl': 'calc(var(--radius) + 4px)',
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'

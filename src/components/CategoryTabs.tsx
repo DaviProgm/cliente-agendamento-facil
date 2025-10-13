@@ -22,7 +22,7 @@ export const CategoryTabs = ({ activeCategory, onCategoryChange }: CategoryTabsP
   return (
     <div className="w-full max-w-6xl mx-auto mb-8">
       <Tabs value={activeCategory} onValueChange={onCategoryChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8 bg-background/50 backdrop-blur-md border border-border/50 rounded-xl p-2 h-auto gap-2">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-2 h-auto gap-2">
           {categories.map((category) => {
             const Icon = category.icon;
             return (

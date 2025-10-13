@@ -84,7 +84,7 @@ export const ProviderModal = ({ provider, open, onOpenChange }: ProviderModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-card backdrop-blur-md border border-border/50">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-black/20 backdrop-blur-md border border-white/10">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-foreground">
             Perfil do Profissional

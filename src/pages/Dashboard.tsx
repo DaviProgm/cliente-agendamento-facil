@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Routes, Route, Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Users, UserPlus, Menu, Bell } from "lucide-react";
+import { Calendar, Users, UserPlus, Menu, Bell, Plus } from "lucide-react";
 import Sidebar from "@/components/DashboardCreditor/Sidebar";
 import ClientList from "@/components/DashboardCreditor/ClientList";
 import AppointmentList from "@/components/DashboardCreditor/AppointmentList";
@@ -214,7 +214,7 @@ const Dashboard: React.FC = () => {
     );
   }
   return (
-    <div className="flex h-screen bg-gradient-to-br from-galactic-dark via-galactic-indigo to-galactic-dark text-foreground">
+    <div className="flex h-screen text-light-text">
       <div className="hidden lg:block">
         <Sidebar
           onLogout={handleLogout}
@@ -320,6 +320,13 @@ const Dashboard: React.FC = () => {
         onClose={() => setIsAppointmentModalOpen(false)}
         onCreated={() => { }}
       />
+
+      <Button
+        onClick={() => setIsAppointmentModalOpen(true)}
+        className="fixed bottom-6 right-6 h-16 w-16 rounded-full bg-vibrant-accent text-white shadow-lg animate-pulse-glow"
+      >
+        <Plus className="h-8 w-8" />
+      </Button>
 
       {/* Tutorial Dialog */}
       <Dialog open={showTutorial} onOpenChange={setShowTutorial}>

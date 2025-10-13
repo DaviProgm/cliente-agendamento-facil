@@ -30,7 +30,7 @@ export const SearchBar = ({ onSearch }: SearchBarProps) => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-gradient-card backdrop-blur-md rounded-2xl p-6 shadow-card border border-border/50">
+    <div className="w-full max-w-4xl mx-auto bg-black/40 backdrop-blur-md rounded-2xl p-6 shadow-card border border-white/10">
       <div className="flex flex-col md:flex-row gap-4">
         {/* Search Input */}
         <div className="flex-1 relative">

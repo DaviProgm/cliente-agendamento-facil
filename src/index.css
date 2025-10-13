@@ -98,7 +98,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gradient-to-br from-[#0B0B0D] to-[#4B0E7A] text-foreground;
   }
 }
 
@@ -134,4 +134,17 @@
   .galactic-background {
     background-attachment: scroll;
   }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px 5px rgba(110, 0, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px 10px rgba(110, 0, 255, 0.5);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s infinite ease-in-out;
 }

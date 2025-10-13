@@ -28,7 +28,7 @@ export const ProviderCard = ({ provider }: ProviderCardProps) => {
 
   return (
     <>
-      <div className="group bg-gradient-card backdrop-blur-md rounded-xl p-6 shadow-card border border-border/50 hover:shadow-elevation hover:scale-[1.02] transition-all duration-300 animate-fade-in">
+      <div className="group bg-black/40 backdrop-blur-md rounded-xl p-6 shadow-card border border-white/10 hover:shadow-elevation hover:scale-[1.02] transition-all duration-300 animate-fade-in">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">

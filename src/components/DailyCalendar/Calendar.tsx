@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { format, addDays, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Clock, PlusCircle } from 'lucide-react';
+import { Clock, PlusCircle, Wind } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export interface DailyEvent {
   id: string | number;
@@ -15,6 +16,7 @@ export interface DailyEvent {
 interface DailyCalendarProps {
   date: Date;
   events?: DailyEvent[];
+  isLoading?: boolean;
   onDateChange?: (date: Date) => void;
   onTimeSlotClick?: (time: string) => void;
   onEventClick?: (event: DailyEvent) => void;
@@ -26,12 +28,13 @@ interface DailyCalendarProps {
 export function DailyCalendar({
   date,
   events = [],
+  isLoading = false,
   onDateChange,
   onTimeSlotClick,
   onEventClick,
   startHour = 8,
   endHour = 18,
-  intervalMinutes = 30,
+  intervalMinutes = 60,
 }: DailyCalendarProps) {
   const [now, setNow] = useState(new Date());
 
@@ -40,104 +43,123 @@ export function DailyCalendar({
     return () => clearInterval(timer);
   }, []);
 
-  function generateTimeSlots() {
+  const timeSlots = useMemo(() => {
     const slots = [];
-    for (let hour = startHour; hour <= endHour; hour++) {
+    for (let hour = startHour; hour < endHour; hour++) {
       for (let min = 0; min < 60; min += intervalMinutes) {
-        if (hour === endHour && min > 0) break;
         slots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
       }
     }
     return slots;
-  }
+  }, [startHour, endHour, intervalMinutes]);
+
+  const validEvents = useMemo(() => {
+    return events.filter(ev => ev.startTime && ev.endTime && ev.startTime < ev.endTime);
+  }, [events]);
 
   function getEventForSlot(time: string) {
-    return events.find((ev) => ev.startTime <= time && time < ev.endTime);
+    return validEvents.find((ev) => ev.startTime <= time && time < ev.endTime);
   }
 
-  const timeSlots = generateTimeSlots();
+  const renderSkeleton = () => (
+    <div className="space-y-4 pt-4">
+      {timeSlots.map((time) => (
+        <div key={time} className="grid grid-cols-[auto_1fr] gap-x-4 items-center">
+          <Skeleton className="h-4 w-14 bg-white/5" />
+          <Skeleton className="h-12 w-full bg-white/5" />
+        </div>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-card rounded-2xl shadow-lg border border-border">
-      <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-sm p-4 rounded-lg mb-6 flex items-center justify-between">
-        <button onClick={() => onDateChange?.(addDays(date, -1))} className="text-muted-foreground hover:text-foreground px-3 py-1 border rounded-lg shadow-sm">‹</button>
+    <div className="p-4 sm:p-6 bg-black/40 backdrop-blur-md rounded-2xl shadow-lg border border-white/10">
+      <div className="sticky top-0 z-20 bg-transparent p-4 rounded-lg mb-4 flex items-center justify-between">
+        <button 
+          onClick={() => onDateChange?.(addDays(date, -1))} 
+          className="text-soft-text hover:bg-white/10 border border-white/10 rounded-lg shadow-sm px-3 py-1 transition-colors"
+        >
+          ‹
+        </button>
         <div className="text-center">
-          <h2 className="text-xl md:text-2xl font-bold text-foreground">
-            {format(date, "EEEE, dd 'de' MMMM yyyy", { locale: ptBR })}
+          <h2 className="text-2xl md:text-3xl font-bold text-light-text capitalize">
+            {format(date, "EEEE, dd 'de' MMMM", { locale: ptBR })}
           </h2>
-          <button
-            onClick={() => onDateChange?.(new Date())}
-            disabled={isToday(date)}
-            className="text-sm text-primary hover:underline disabled:text-muted-foreground disabled:cursor-not-allowed"
-          >
-            Hoje
-          </button>
+          {!isToday(date) && (
+            <button
+              onClick={() => onDateChange?.(new Date())}
+              className="text-base text-vibrant-accent/80 hover:text-vibrant-accent hover:underline"
+            >
+              Ir para hoje
+            </button>
+          )}
         </div>
-        <button onClick={() => onDateChange?.(addDays(date, 1))} className="text-muted-foreground hover:text-foreground px-3 py-1 border rounded-lg shadow-sm">›</button>
+        <button 
+          onClick={() => onDateChange?.(addDays(date, 1))} 
+          className="text-soft-text hover:bg-white/10 border border-white/10 rounded-lg shadow-sm px-3 py-1 transition-colors"
+        >
+          ›
+        </button>
       </div>
 
       <div className="relative">
         {isToday(date) && (
           <div
-            className="absolute left-12 right-0 h-0.5 bg-destructive z-10"
-            style={{
-              top: `${((now.getHours() - startHour) * 60 + now.getMinutes()) / ((endHour - startHour) * 60) * 100}%`,
-            }}
-          ></div>
+            className="absolute left-20 right-0 h-0.5 bg-vibrant-accent z-10"
+            style={{ top: `${((now.getHours() - startHour) * 60 + now.getMinutes()) / ((endHour - startHour) * 60) * 100}%` }}
+          >
+            <div className="absolute -left-1 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-vibrant-accent shadow-[0_0_8px_2px_theme(colors.vibrant-accent)]"></div>
+          </div>
         )}
 
         <div className="grid grid-cols-[auto_1fr] gap-x-4">
-          {timeSlots.map((time) => {
-            const event = getEventForSlot(time);
-            const isPast = new Date(`${format(date, 'yyyy-MM-dd')}T${time}`) < now;
-            const slotKey = `${format(date, 'yyyy-MM-dd')}-${time}`;
+          {isLoading ? renderSkeleton() : (
+              timeSlots.map((time) => {
+                const event = getEventForSlot(time);
+                const isPast = new Date(`${format(date, 'yyyy-MM-dd')}T${time}`) < now;
 
-            return (
-              <div key={slotKey}>
-                <div className="text-right text-sm text-muted-foreground pr-2 pt-3 font-mono">
-                  {time}
-                </div>
-                <div
-                  onClick={() => !event && !isPast && onTimeSlotClick?.(time)}
-                  className={`border-l-2 pl-4 py-3 relative ${
-                    event
-                      ? 'border-destructive'
-                      : isPast
-                      ? 'border-border'
-                      : 'border-secondary hover:border-primary'
-                  }`}
-                >
-                  {event && (
+                return (
+                  <React.Fragment key={time}>
+                    <div className="text-right text-base text-soft-text/60 font-mono pt-3">
+                      {time}
+                    </div>
                     <div
-                      onClick={() => onEventClick?.(event)}
-                      className="bg-destructive/10 p-3 rounded-lg cursor-pointer hover:bg-destructive/20 transition-colors"
+                      onClick={() => !event && !isPast && onTimeSlotClick?.(time)}
+                      className={`border-l-2 pl-4 py-2 relative transition-colors duration-300 ${
+                        event
+                          ? 'border-vibrant-accent/50'
+                          : isPast
+                          ? 'border-white/10'
+                          : 'border-white/20 hover:border-vibrant-accent/80 hover:bg-white/5 cursor-pointer'
+                      }`}
                     >
-                      <p className="font-semibold text-destructive-foreground">{event.title}</p>
-                      {event.description && (
-                        <p className="text-sm text-destructive-foreground/80">{event.description}</p>
+                      {event ? (
+                        <div
+                          onClick={() => onEventClick?.(event)}
+                          className="bg-vibrant-accent/20 p-3 rounded-lg cursor-pointer border border-vibrant-accent/30 hover:bg-vibrant-accent/30 transition-colors"
+                        >
+                          <p className="font-semibold text-light-text text-lg">{event.title}</p>
+                          {event.description && (
+                            <p className="text-base text-soft-text">{event.description}</p>
+                          )}
+                          <div className="text-sm text-soft-text/80 mt-1 flex items-center">
+                            <Clock size={12} className="inline mr-1.5" />
+                            {event.startTime} - {event.endTime}
+                          </div>
+                        </div>
+                      ) : isPast ? (
+                        <div className="text-soft-text/40 italic text-base">--</div>
+                      ) : (
+                        <div className="text-soft-text/80 font-medium text-base flex items-center">
+                          <PlusCircle size={14} className="mr-2" />
+                          Disponível
+                        </div>
                       )}
-                      <div className="text-xs text-destructive-foreground/70 mt-1">
-                        <Clock size={12} className="inline mr-1" />
-                        {event.startTime} - {event.endTime}
-                      </div>
                     </div>
-                  )}
-
-                  {!event && isPast && (
-                    <div className="text-muted-foreground italic text-sm">Tempo expirado</div>
-                  )}
-
-                  {!event && !isPast && (
-                    <div className="text-secondary font-medium text-sm cursor-pointer flex items-center">
-                      <PlusCircle size={14} className="mr-2" />
-                      Disponível
-                    </div>
-                  )}
-                </div>
-              </div>
-
-            );
-          })}
+                  </React.Fragment>
+                );
+              })
+          )}
         </div>
       </div>
     </div>
