@@ -56,7 +56,7 @@ const Sidebar = ({ onLogout, onToggleSidebar }: SidebarProps) => {
   ];
 
   return (
-    <div className="bg-card w-64 h-screen shadow-md border-r flex flex-col">
+    <div className="bg-card w-64 h-dvh shadow-md border-r flex flex-col">
       <div className="p-4 border-b flex items-center justify-between">
         <h2 className="text-xl font-extrabold text-foreground tracking-tight">Workgate</h2>
         <button

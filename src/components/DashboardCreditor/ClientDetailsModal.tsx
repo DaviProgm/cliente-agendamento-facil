@@ -7,6 +7,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface Client {
   id: number;
@@ -29,55 +30,51 @@ const ClientDetailsModal = ({ client, isOpen, onClose }: ClientDetailsModalProps
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="max-w-md rounded-2xl border border-[#8B5CF6]">
+      <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-[#8B5CF6] text-lg font-bold">
-            Detalhes do Cliente
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-sm text-gray-600">
-            Informações completas e atualizadas do cliente selecionado.
+          <AlertDialogTitle>Detalhes do Cliente</AlertDialogTitle>
+          <AlertDialogDescription>
+            Informações completas de {client.name}.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="mt-4 space-y-3 text-sm text-gray-800 px-1">
-          <div>
-            <span className="font-medium text-[#8B5CF6]">Nome:</span>{" "}
-            {client.name}
+        <div className="mt-4 space-y-3 text-sm text-foreground">
+          <div className="flex justify-between">
+            <span className="font-medium text-muted-foreground">Nome:</span>
+            <span>{client.name}</span>
           </div>
-          <div>
-            <span className="font-medium text-[#8B5CF6]">Email:</span>{" "}
-            {client.email}
+          <div className="flex justify-between">
+            <span className="font-medium text-muted-foreground">Email:</span>
+            <span>{client.email}</span>
           </div>
-          <div>
-            <span className="font-medium text-[#8B5CF6]">Telefone:</span>{" "}
-            {client.phone}
+          <div className="flex justify-between">
+            <span className="font-medium text-muted-foreground">Telefone:</span>
+            <span>{client.phone}</span>
           </div>
           {client.address && (
-            <div>
-              <span className="font-medium text-[#8B5CF6]">Endereço:</span>{" "}
-              {client.address}
+            <div className="flex justify-between">
+              <span className="font-medium text-muted-foreground">Endereço:</span>
+              <span className="text-right">{client.address}</span>
             </div>
           )}
-          <div>
-            <span className="font-medium text-[#8B5CF6]">Status:</span>{" "}
-            <span
-              className={`font-semibold ${
-                client.status === "ativo" ? "text-green-600" : "text-red-500"
-              }`}
-            >
+          <div className="flex justify-between items-center">
+            <span className="font-medium text-muted-foreground">Status:</span>
+            <Badge variant={client.status === "ativo" ? "secondary" : "destructive"}>
               {client.status}
-            </span>
+            </Badge>
           </div>
-          <div>
-            <span className="font-medium text-[#8B5CF6]">Último agendamento:</span>{" "}
-            {client.lastAppointment
-              ? new Date(client.lastAppointment).toLocaleDateString("pt-BR")
-              : "Nenhum"}
+          <div className="flex justify-between">
+            <span className="font-medium text-muted-foreground">Último agendamento:</span>
+            <span>
+              {client.lastAppointment
+                ? new Date(client.lastAppointment).toLocaleDateString("pt-BR")
+                : "Nenhum"}
+            </span>
           </div>
         </div>
 
         <AlertDialogFooter className="mt-4">
-          <Button onClick={onClose} className="bg-[#8B5CF6] text-white hover:bg-[#7a4fe6]">
+          <Button onClick={onClose}>
             Fechar
           </Button>
         </AlertDialogFooter>

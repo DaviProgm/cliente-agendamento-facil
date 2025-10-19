@@ -44,7 +44,7 @@ const WeeklyReport = () => {
 
   const chartData = report ? [
     { name: 'Clientes Novos', valor: report.clientIncrease, fill: '#00BFFF' },
-    { name: 'Agend. Concluídos', valor: report.completedSchedules, fill: 'hsl(var(--primary))' },
+    { name: 'Agend. Concluídos', valor: report.completedSchedules, fill: '#6E00FF' },
     { name: 'Agend. Cancelados', valor: report.canceledSchedules, fill: 'hsl(var(--destructive))' },
   ] : [];
 

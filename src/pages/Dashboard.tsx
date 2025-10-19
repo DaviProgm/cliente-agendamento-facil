@@ -215,7 +215,7 @@ const Dashboard: React.FC = () => {
     );
   }
   return (
-    <div className="flex h-screen">
+    <div className="flex h-dvh">
       <div className="hidden lg:block">
         <Sidebar
           onLogout={handleLogout}

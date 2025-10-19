@@ -47,7 +47,7 @@ const Header = () => {
               <Button
                 onClick={() => navigate("/login")}
                 variant="secondary"
-                className="font-semibold shadow-md mt-4 bg-black"
+                className="font-semibold shadow-md mt-4"
               >
                 <LogIn className="w-5 h-5 mr-2" />
                 Entrar

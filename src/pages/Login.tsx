@@ -2,7 +2,7 @@ import LoginForm from "@/components/LoginForm";
 
 const Login = () => {
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+    <div className="min-h-dvh grid grid-cols-1 lg:grid-cols-2">
       <div className="flex flex-col items-center justify-center galactic-background p-8 sm:p-12 text-foreground">
         <div className="flex flex-col items-center text-center">
                     <img src="/logo.png" alt="Logo Workgate" className="h-32 sm:h-48 object-contain mb-4 " />
