@@ -168,8 +168,8 @@ const BookingPage = () => {
                       {availability?.length > 0 ? availability.map((slot: string) => (
                         <Button
                           key={slot}
-                          variant={selectedSlot === slot ? 'default' : 'ghost'}
-                          className={selectedSlot !== slot ? 'bg-primary/10 hover:bg-primary/20 border border-primary/20' : ''}
+                          variant="default"
+                          className={selectedSlot !== slot ? 'opacity-60' : ''}
                           onClick={() => setSelectedSlot(slot)}>
                           {slot}
                         </Button>
