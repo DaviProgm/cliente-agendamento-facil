@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,29 @@ const BookingPage = () => {
     queryFn: () => getProviderData(username!),
     enabled: !!username,
   });
+
+  // Helper function to determine if a color is light or dark
+  const getLuminance = (hex: string) => {
+    if (!hex || hex.charAt(0) !== '#') return 0;
+    hex = hex.slice(1);
+    if (hex.length === 3) {
+      hex = hex.split('').map(c => c + c).join('');
+    }
+    if (hex.length !== 6) return 0;
+    const rgb = parseInt(hex, 16);
+    const r = (rgb >> 16) & 0xff;
+    const g = (rgb >> 8) & 0xff;
+    const b = (rgb >> 0) & 0xff;
+    const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luma / 255;
+  };
+
+  const theme = useMemo(() => {
+    const bgColor = providerData?.cor_perfil;
+    if (!bgColor) return 'light'; // Default to light theme if no color
+    return getLuminance(bgColor) > 0.6 ? 'light' : 'dark';
+  }, [providerData?.cor_perfil]);
+
 
   const { data: availability, isLoading: isLoadingAvailability, isError: isErrorAvailability } = useQuery({
     queryKey: ['availability', username, selectedDate, selectedService?.id],
@@ -88,7 +111,9 @@ const BookingPage = () => {
   }
 
   return (
-    <div style={{ backgroundColor: providerData?.cor_perfil || '#FFFFFF', minHeight: '100vh' }} className="transition-colors duration-500">
+    <div 
+      style={{ backgroundColor: providerData?.cor_perfil || '#FFFFFF' }}
+      className={`${theme} min-h-dvh transition-colors duration-500`}>
       <div className="container mx-auto p-4 sm:p-6">
         <header className="flex items-center gap-4 mb-8">
           <Avatar className="h-24 w-24">
@@ -96,8 +121,8 @@ const BookingPage = () => {
             <AvatarFallback>{providerData?.name?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-3xl font-bold">{providerData?.name}</h1>
-            <p className="text-muted-foreground mt-1">{providerData?.bio}</p>
+            <h1 className="text-3xl font-bold text-foreground">{providerData?.name}</h1>
+            <p className="text-foreground/90 mt-1">{providerData?.bio}</p>
           </div>
         </header>
 
@@ -143,7 +168,8 @@ const BookingPage = () => {
                       {availability?.length > 0 ? availability.map((slot: string) => (
                         <Button
                           key={slot}
-                          variant={selectedSlot === slot ? 'default' : 'outline'}
+                          variant={selectedSlot === slot ? 'default' : 'ghost'}
+                          className={selectedSlot !== slot ? 'bg-primary/10 hover:bg-primary/20 border border-primary/20' : ''}
                           onClick={() => setSelectedSlot(slot)}>
                           {slot}
                         </Button>

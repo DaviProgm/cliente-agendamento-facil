@@ -11,10 +11,10 @@ const Hero = () => {
           className="h-[250px] md:h-[80px] object-contain mb-4 lg:hidden"
         />
 
-        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight mb-4">
+        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight mb-4 text-white">
           Organize seu tempo, <br className="hidden md:inline" />maximize seus resultados.
         </h1>
-        <p className="text-lg md:text-xl max-w-xl mb-8 text-foreground/90">
+        <p className="text-lg md:text-xl max-w-xl mb-8 text-white/90">
           A Workgate é a solução completa para gerenciar seus agendamentos e clientes de forma inteligente e eficiente.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">

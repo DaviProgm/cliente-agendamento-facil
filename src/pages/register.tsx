@@ -7,7 +7,7 @@ const Register = () => {
   const plan = searchParams.get("plan");
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+    <div className="min-h-dvh grid grid-cols-1 lg:grid-cols-2 dark">
       <div className="flex flex-col items-center justify-center galactic-background p-8 sm:p-12 text-foreground">
         <div className="flex flex-col items-center text-center">
                     <img src="/logo.png" alt="Logo Workgate" className="h-52 sm:h-98 object-contain mb-4 p-4 rounded-lg" />

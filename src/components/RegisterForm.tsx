@@ -6,13 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-
 const RegisterForm = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [cpfCnpj, setCpfCnpj] = useState(""); // 1. Adicionado estado para CPF/CNPJ
+  const [cpfCnpj, setCpfCnpj] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -21,7 +19,6 @@ const RegisterForm = () => {
     setLoading(true);
 
     try {
-      // 3. Adicionado cpfCnpj no envio para a API
       await api.post("/users/register", {
         name,
         email,
@@ -33,9 +30,10 @@ const RegisterForm = () => {
       toast.success("Cadastro realizado com sucesso! Faça o login para continuar.");
       navigate("/login");
     } catch (error: any) {
-      const errorMessage = error.response?.data?.errors?.[0]?.description ||
-                           error.response?.data?.message ||
-                           error.message;
+      const errorMessage =
+        error.response?.data?.errors?.[0]?.description ||
+        error.response?.data?.message ||
+        error.message;
       toast.error(`Erro ao cadastrar: ${errorMessage}`);
     } finally {
       setLoading(false);
@@ -43,10 +41,9 @@ const RegisterForm = () => {
   };
 
   return (
-    <Card className="p-4 sm:p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Nome</Label>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Nome</Label>
         <Input
           id="name"
           type="text"
@@ -54,11 +51,9 @@ const RegisterForm = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="bg-gray-100 text-black rounded-md"
         />
       </div>
 
-      {/* 2. Adicionado campo do formulário para CPF/CNPJ */}
       <div className="space-y-2">
         <Label htmlFor="cpfCnpj">CPF ou CNPJ</Label>
         <Input
@@ -68,7 +63,6 @@ const RegisterForm = () => {
           value={cpfCnpj}
           onChange={(e) => setCpfCnpj(e.target.value)}
           required
-          className="bg-gray-100 text-black rounded-md"
         />
       </div>
 
@@ -81,7 +75,6 @@ const RegisterForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="bg-ray-100 text-black rounded-md"
         />
       </div>
       <div className="space-y-2">
@@ -93,19 +86,17 @@ const RegisterForm = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="bg-gray-100 text-black rounded-md"
         />
       </div>
 
       <Button
         type="submit"
-        className="w-full bg-indigo-700 text-white hover:bg-indigo-800 font-semibold shadow-md mt-2"
+        className="w-full font-semibold shadow-md mt-2"
         disabled={loading}
       >
         {loading ? "Criando conta..." : "Criar Conta"}
       </Button>
     </form>
-  </Card>
   );
 };
 

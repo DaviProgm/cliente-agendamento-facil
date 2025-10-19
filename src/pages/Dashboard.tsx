@@ -239,7 +239,7 @@ const Dashboard: React.FC = () => {
       )}
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-card/80 backdrop-blur-sm border-b border-border shadow-sm p-4">
+        <header className="bg-card border-b border-border shadow-sm p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <Button

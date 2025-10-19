@@ -17,11 +17,11 @@ const Pricing = () => {
         {/* Plano Básico */}
         <Card className="flex flex-col">
           <CardHeader>
-            <CardTitle className="text-2xl">Plano Básico</CardTitle>
+            <CardTitle className="text-2xl text-white">Plano Básico</CardTitle>
           </CardHeader>
           <CardContent className="flex-grow">
-            <p className="text-3xl font-bold">R$ 29,99<span className="text-lg font-normal text-muted-foreground">/mês</span></p>
-            <ul className="list-disc list-inside mt-6 space-y-2">
+            <p className="text-3xl font-bold text-white">R$ 29,99<span className="text-lg font-normal text-muted-foreground">/mês</span></p>
+            <ul className="list-disc list-inside mt-6 space-y-2 text-white">
               <li>Agendamentos ilimitados</li>
               <li>Cadastro de clientes</li>
               <li>Suporte por e-mail</li>

@@ -98,7 +98,7 @@ const Assinatura = () => {
             <p className="text-lg">Plano: <span className="font-semibold capitalize text-primary">{subscription.subscription.plan}</span></p>
             <div className="flex items-center">
               <p className="text-lg mr-3">Status:</p>
-              <Badge className={subscription.subscription.status === 'ativo' ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'}>
+              <Badge variant={subscription.subscription.status === 'ativo' ? 'secondary' : 'default'}>
                 {subscription.subscription.status}
               </Badge>
             </div>

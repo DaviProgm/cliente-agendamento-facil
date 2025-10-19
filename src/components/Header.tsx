@@ -18,7 +18,7 @@ const Header = () => {
     >
       <div className="flex items-center ">
         <img src="/logo.png" alt="Logo Workgate" className="h-[100px] w-auto ml-[-15px] " />
-        <span className="text-2xl font-bold ml-[-15px]">WORKGATE</span>
+        <span className="text-2xl font-bold ml-[-15px] text-white">WORKGATE</span>
       </div>
 
       {/* Desktop Navigation */}

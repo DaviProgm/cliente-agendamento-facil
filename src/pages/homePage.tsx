@@ -18,8 +18,8 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="relative flex flex-col items-center min-h-screen galactic-background text-foreground px-6 py-4">
-      <Bubbles />
+    <div className="relative flex flex-col items-center min-h-dvh galactic-background text-foreground px-6 py-4">
+      {/* <Bubbles /> */}
       <div className="relative z-10 w-full flex flex-col items-center overflow-y-auto">
         <Header />
         <main className="w-full flex flex-col items-center">
