@@ -2,7 +2,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const api = axios.create({
-  baseURL: "https://schedule-control-api.onrender.com",
+  baseURL: "http://vps62220.publiccloud.com.br:4005",
 });
 
 api.interceptors.request.use((config) => {

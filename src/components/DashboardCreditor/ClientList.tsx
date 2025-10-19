@@ -34,40 +34,48 @@ const ClientList = () => {
   };
 
   useEffect(() => {
-    const fetchClientsWithLastAppointment = async () => {
+    const fetchClientsAndAppointments = async () => {
       try {
-        const responseClients = await api.get("/clientes");
-        const clientsData: Client[] = responseClients.data;
+        // 1. Fetch clients and all appointments in parallel
+        const [clientsResponse, schedulesResponse] = await Promise.all([
+          api.get("/clientes"),
+          api.get("/agendamentos"),
+        ]);
 
-        const clientsWithLastAppointment = await Promise.all(
-          clientsData.map(async (client) => {
-            try {
-              const resSchedules = await api.get(`/agendamentos?clientId=${client.id}`);
-              const schedules = resSchedules.data;
-              schedules.sort(
-                (a: { date: string }, b: { date: string }) =>
-                  new Date(b.date).getTime() - new Date(a.date).getTime()
-              );
-              const lastAppointment = schedules.length > 0 ? schedules[0].date : null;
-              return { ...client, status: client.status || "ativo", lastAppointment };
-            } catch {
-              return { ...client, status: client.status || "ativo", lastAppointment: null };
+        const clientsData: Client[] = clientsResponse.data;
+        const schedulesData: any[] = schedulesResponse.data;
+
+        // 2. Process appointments to find the last one for each client
+        const lastAppointments = new Map<number, string>();
+        schedulesData.forEach(schedule => {
+          if (schedule.clientId) {
+            const existing = lastAppointments.get(schedule.clientId);
+            if (!existing || new Date(schedule.date) > new Date(existing)) {
+              lastAppointments.set(schedule.clientId, schedule.date);
             }
-          })
-        );
+          }
+        });
+
+        // 3. Combine the data
+        const clientsWithLastAppointment = clientsData.map(client => ({
+          ...client,
+          status: client.status || "ativo",
+          lastAppointment: lastAppointments.get(client.id) || null,
+        }));
 
         setClients(clientsWithLastAppointment);
+
       } catch (error) {
-        console.error("Erro ao buscar clientes:", error);
+        console.error("Erro ao buscar clientes ou agendamentos:", error);
         toast({
-          title: "Erro ao carregar clientes",
+          title: "Erro ao carregar dados",
           description: "Verifique sua conexão ou tente novamente mais tarde.",
           variant: "destructive",
         });
       }
     };
 
-    fetchClientsWithLastAppointment();
+    fetchClientsAndAppointments();
   }, []);
 
   const filteredClients = clients.filter(
@@ -130,7 +138,6 @@ const ClientList = () => {
                       Último agendamento: {formatDate(client.lastAppointment)}
                     </p>
                     <Button
-                      variant="secondary"
                       size="sm"
                       className="w-full sm:w-auto"
                       onClick={() => {

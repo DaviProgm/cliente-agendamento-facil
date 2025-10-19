@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../instance/api";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import EditAppointmentModal from "./EditAppointmentmodal";
-import { Calendar, Search } from "lucide-react";
+import { Calendar, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useOutletContext } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// ... (interfaces remain the same)
 interface Service {
   id: number;
   name: string;
@@ -43,6 +44,7 @@ interface Appointment {
   serviceId: number;
 }
 
+
 const statusOptions = [
   "agendado",
   "confirmado",
@@ -51,12 +53,15 @@ const statusOptions = [
   "cancelado",
 ];
 
+const ITEMS_PER_PAGE = 15;
+
 const AppointmentList: React.FC = () => {
   const { setIsAppointmentModalOpen } = useOutletContext() as any;
   const [searchTerm, setSearchTerm] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
 
   const { data: appointments = [], isLoading, isError } = useQuery<Appointment[]>({
@@ -67,7 +72,13 @@ const AppointmentList: React.FC = () => {
         toast({ title: "Erro", description: "Resposta inválida da API.", variant: "destructive" });
         return [];
       }
-      return res.data.map((item: any) => ({ ...item, status: item.status ?? "agendado" }));
+      // Sort appointments by date and time, newest first
+      const sortedData = res.data.sort((a: Appointment, b: Appointment) => {
+        const dateA = new Date(`${a.date}T${a.time}`);
+        const dateB = new Date(`${b.date}T${b.time}`);
+        return dateB.getTime() - dateA.getTime();
+      });
+      return sortedData.map((item: any) => ({ ...item, status: item.status ?? "agendado" }));
     }
   });
 
@@ -77,19 +88,26 @@ const AppointmentList: React.FC = () => {
     return `${day}/${month}/${year}`;
   };
 
-  const filteredAppointments = appointments
+  const filteredAppointments = useMemo(() => appointments
     .filter(appointment => showCompleted ? true : appointment.status !== 'concluído')
     .filter((appointment) =>
       (appointment.client?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
       (appointment.service?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-    );
+    ), [appointments, showCompleted, searchTerm]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
+  const paginatedAppointments = filteredAppointments.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const statusStyles: { [key: string]: string } = {
-    agendado: "bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30",
-    confirmado: "bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30",
-    'em andamento': "bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/30",
-    concluído: "bg-vibrant-accent/20 text-vibrant-accent border-vibrant-accent/30 hover:bg-vibrant-accent/30",
-    cancelado: "bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30",
+    agendado: "border-transparent bg-blue-500 text-primary-foreground",
+    confirmado: "border-transparent bg-green-500 text-primary-foreground",
+    'em andamento': "border-transparent bg-yellow-500 text-black",
+    concluído: "border-transparent bg-primary text-primary-foreground",
+    cancelado: "border-transparent bg-destructive text-destructive-foreground",
   };
 
   const handleStatusChange = async (appointmentId: number, newStatus: string) => {
@@ -113,20 +131,20 @@ const AppointmentList: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ["appointments"] });
   };
 
-  if (isLoading) return <div className="text-center p-10 text-soft-text">Carregando agendamentos...</div>;
-  if (isError) return <div className="text-center p-10 text-red-400">Erro ao carregar agendamentos.</div>;
+  if (isLoading) return <div className="text-center p-10 text-muted-foreground">Carregando agendamentos...</div>;
+  if (isError) return <div className="text-center p-10 text-destructive">Erro ao carregar agendamentos.</div>;
 
   return (
     <>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-soft-text w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               placeholder="Buscar por cliente ou serviço..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-main-background border-gradient-end focus:ring-vibrant-accent text-light-text placeholder:text-soft-text"
+              className="pl-10"
             />
           </div>
           <div className="flex items-center space-x-2">
@@ -134,34 +152,33 @@ const AppointmentList: React.FC = () => {
               id="show-completed" 
               checked={showCompleted} 
               onCheckedChange={(checked) => setShowCompleted(!!checked)}
-              className="border-soft-text/50 data-[state=checked]:bg-vibrant-accent data-[state=checked]:text-light-text"
             />
             <label
               htmlFor="show-completed"
-              className="text-sm font-medium leading-none text-soft-text peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Mostrar concluídos
             </label>
           </div>
-          <Button onClick={() => setIsAppointmentModalOpen(true)} className="bg-vibrant-accent text-light-text hover:bg-vibrant-accent/90">
+          <Button onClick={() => setIsAppointmentModalOpen(true)}>
             <Calendar className="w-4 h-4 mr-2" /> Novo Agendamento
           </Button>
         </div>
 
         <div className="grid gap-4">
-          {filteredAppointments.map((appointment) => (
+          {paginatedAppointments.map((appointment) => (
             <motion.div
               key={appointment.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="bg-black/40 backdrop-blur-md rounded-2xl shadow-lg border border-white/10">
+              <Card>
                 <CardHeader className="pb-4">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg font-semibold truncate text-light-text">{appointment.client.name}</CardTitle>
-                      <p className="text-sm text-soft-text">{appointment.service.name}</p>
+                      <CardTitle className="text-lg font-semibold truncate">{appointment.client.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{appointment.service.name}</p>
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -169,12 +186,11 @@ const AppointmentList: React.FC = () => {
                           {appointment.status?.charAt(0).toUpperCase() + appointment.status?.slice(1)}
                         </Badge>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-main-background border-gradient-end text-light-text">
+                      <DropdownMenuContent align="end">
                         {statusOptions.map((status) => (
                           <DropdownMenuItem
                             key={status}
                             onSelect={() => handleStatusChange(appointment.id, status)}
-                            className="focus:bg-gradient-end focus:text-white"
                           >
                             {status.charAt(0).toUpperCase() + status.slice(1)}
                           </DropdownMenuItem>
@@ -186,11 +202,11 @@ const AppointmentList: React.FC = () => {
                 <CardContent className="pt-0">
                   <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
                     <div>
-                      <p className="text-base font-medium text-light-text">
+                      <p className="text-base font-medium">
                         {formatDateToBR(appointment.date)} às {appointment.time}
                       </p>
                       {appointment.observations && (
-                        <p className="text-sm text-soft-text mt-1 max-w-xs truncate">{appointment.observations}</p>
+                        <p className="text-sm text-muted-foreground mt-1 max-w-xs truncate">{appointment.observations}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -198,7 +214,6 @@ const AppointmentList: React.FC = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEditClick(appointment)}
-                        className="bg-transparent border-soft-text/50 text-soft-text hover:bg-soft-text/10 hover:text-light-text"
                       >
                         Editar
                       </Button>
@@ -209,6 +224,30 @@ const AppointmentList: React.FC = () => {
             </motion.div>
           ))}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center space-x-4 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              Anterior
+            </Button>
+            <span className="text-sm font-medium">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Próximo
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        )}
       </div>
 
       <EditAppointmentModal

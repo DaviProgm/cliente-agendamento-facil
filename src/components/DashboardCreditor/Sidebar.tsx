@@ -90,7 +90,6 @@ const Sidebar = ({ onLogout, onToggleSidebar }: SidebarProps) => {
 
       <div className="p-4 border-t mt-auto">
         <Button
-          variant="outline"
           className="w-full text-sm"
           onClick={onLogout}
         >

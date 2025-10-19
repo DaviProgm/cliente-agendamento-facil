@@ -73,22 +73,22 @@ export function DailyCalendar({
   );
 
   return (
-    <div className="p-4 sm:p-6 bg-black/40 backdrop-blur-md rounded-2xl shadow-lg border border-white/10">
-      <div className="sticky top-0 z-20 bg-transparent p-4 rounded-lg mb-4 flex items-center justify-between">
+    <div className="p-4 sm:p-6 bg-card rounded-2xl shadow-lg border">
+      <div className="sticky top-0 z-20 bg-card p-4 rounded-lg mb-4 flex items-center justify-between">
         <button 
           onClick={() => onDateChange?.(addDays(date, -1))} 
-          className="text-soft-text hover:bg-white/10 border border-white/10 rounded-lg shadow-sm px-3 py-1 transition-colors"
+          className="text-muted-foreground hover:bg-accent border rounded-lg shadow-sm px-3 py-1 transition-colors"
         >
           ‹
         </button>
         <div className="text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-light-text capitalize">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground capitalize">
             {format(date, "EEEE, dd 'de' MMMM", { locale: ptBR })}
           </h2>
           {!isToday(date) && (
             <button
               onClick={() => onDateChange?.(new Date())}
-              className="text-base text-vibrant-accent/80 hover:text-vibrant-accent hover:underline"
+              className="text-base text-primary/80 hover:text-primary hover:underline"
             >
               Ir para hoje
             </button>
@@ -96,7 +96,7 @@ export function DailyCalendar({
         </div>
         <button 
           onClick={() => onDateChange?.(addDays(date, 1))} 
-          className="text-soft-text hover:bg-white/10 border border-white/10 rounded-lg shadow-sm px-3 py-1 transition-colors"
+          className="text-muted-foreground hover:bg-accent border rounded-lg shadow-sm px-3 py-1 transition-colors"
         >
           ›
         </button>
@@ -105,10 +105,10 @@ export function DailyCalendar({
       <div className="relative">
         {isToday(date) && (
           <div
-            className="absolute left-20 right-0 h-0.5 bg-vibrant-accent z-10"
+            className="absolute left-20 right-0 h-0.5 bg-primary z-10"
             style={{ top: `${((now.getHours() - startHour) * 60 + now.getMinutes()) / ((endHour - startHour) * 60) * 100}%` }}
           >
-            <div className="absolute -left-1 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-vibrant-accent shadow-[0_0_8px_2px_theme(colors.vibrant-accent)]"></div>
+            <div className="absolute -left-1 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_2px_theme(colors.primary)]"></div>
           </div>
         )}
 
@@ -120,37 +120,37 @@ export function DailyCalendar({
 
                 return (
                   <React.Fragment key={time}>
-                    <div className="text-right text-base text-soft-text/60 font-mono pt-3">
+                    <div className="text-right text-base text-muted-foreground/60 font-mono pt-3">
                       {time}
                     </div>
                     <div
                       onClick={() => !event && !isPast && onTimeSlotClick?.(time)}
                       className={`border-l-2 pl-4 py-2 relative transition-colors duration-300 ${
                         event
-                          ? 'border-vibrant-accent/50'
+                          ? 'border-primary/50'
                           : isPast
-                          ? 'border-white/10'
-                          : 'border-white/20 hover:border-vibrant-accent/80 hover:bg-white/5 cursor-pointer'
+                          ? 'border-border/10'
+                          : 'border-border/20 hover:border-primary/80 hover:bg-accent cursor-pointer'
                       }`}
                     >
                       {event ? (
                         <div
                           onClick={() => onEventClick?.(event)}
-                          className="bg-vibrant-accent/20 p-3 rounded-lg cursor-pointer border border-vibrant-accent/30 hover:bg-vibrant-accent/30 transition-colors"
+                          className="bg-secondary p-3 rounded-lg cursor-pointer border border-primary/30 hover:bg-accent transition-colors"
                         >
-                          <p className="font-semibold text-light-text text-lg">{event.title}</p>
+                          <p className="font-semibold text-secondary-foreground text-lg">{event.title}</p>
                           {event.description && (
-                            <p className="text-base text-soft-text">{event.description}</p>
+                            <p className="text-base text-muted-foreground">{event.description}</p>
                           )}
-                          <div className="text-sm text-soft-text/80 mt-1 flex items-center">
+                          <div className="text-sm text-muted-foreground/80 mt-1 flex items-center">
                             <Clock size={12} className="inline mr-1.5" />
                             {event.startTime} - {event.endTime}
                           </div>
                         </div>
                       ) : isPast ? (
-                        <div className="text-soft-text/40 italic text-base">--</div>
+                        <div className="text-muted-foreground/40 italic text-base">--</div>
                       ) : (
-                        <div className="text-soft-text/80 font-medium text-base flex items-center">
+                        <div className="text-muted-foreground/80 font-medium text-base flex items-center">
                           <PlusCircle size={14} className="mr-2" />
                           Disponível
                         </div>

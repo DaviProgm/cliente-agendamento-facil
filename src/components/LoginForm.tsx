@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import api from "@/instance/api"; // Importa a instância da API
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -27,17 +27,24 @@ const LoginForm = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("https://schedule-control-api.onrender.com/auth/login", {
+      // Usa a instância da API para a requisição
+      const response = await api.post("/auth/login", {
         email,
         password,
       });
 
       const { token, user } = response.data;
 
+      // Salva os dados no localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("userId", user.id);
       localStorage.setItem("userEmail", user.email);
       localStorage.setItem("userRole", user.role);
+      // Salva o status da assinatura
+      if (user.subscriptionStatus) {
+        localStorage.setItem("subscriptionStatus", user.subscriptionStatus);
+      }
+
 
       toast({
         title: "Login realizado com sucesso!",

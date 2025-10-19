@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from "@/instance/api";
 
@@ -7,7 +7,7 @@ function isTokenValid(token: string | null) {
 
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
-    const now = Date.now() / 1000; // tempo atual em segundos
+    const now = Date.now() / 1000;
     return payload.exp > now;
   } catch {
     return false;
@@ -16,9 +16,9 @@ function isTokenValid(token: string | null) {
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const token = localStorage.getItem("token");
+  const localSubscriptionStatus = localStorage.getItem("subscriptionStatus");
   const [loading, setLoading] = useState(true);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
-  const location = useLocation();
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(localSubscriptionStatus);
 
   useEffect(() => {
     const checkSubscription = async () => {
@@ -27,16 +27,25 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
         return;
       }
 
+      // Se já temos um status ativo, não precisamos verificar de novo
+      if (localSubscriptionStatus === 'ativo') {
+        setSubscriptionStatus('ativo');
+        setLoading(false);
+        return;
+      }
+
+      // Se não, buscamos na API
       try {
         const response = await api.get('/subscription');
-        console.log("PrivateRoute - Subscription Status from API:", response.data.subscription.status);
-        setSubscriptionStatus(response.data.subscription.status);
+        const apiStatus = response.data.subscription.status;
+        localStorage.setItem('subscriptionStatus', apiStatus); // Atualiza o localStorage
+        setSubscriptionStatus(apiStatus);
       } catch (error: any) {
         if (error.response?.status === 404 || error.response?.status === 403) {
           setSubscriptionStatus('no_subscription');
         } else {
           console.error("Erro ao buscar status da assinatura:", error);
-          setSubscriptionStatus('error'); 
+          setSubscriptionStatus('error');
         }
       } finally {
         setLoading(false);
@@ -44,9 +53,7 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
     };
 
     checkSubscription();
-  }, [token]);
-
-  console.log("PrivateRoute - Final Subscription Status:", subscriptionStatus);
+  }, [token, localSubscriptionStatus]);
 
   if (loading) {
     return (
@@ -59,11 +66,12 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   }
 
   if (!isTokenValid(token)) {
-    localStorage.removeItem("token");
+    localStorage.clear(); // Limpa tudo se o token for inválido
     return <Navigate to="/login" />;
   }
 
-  if (subscriptionStatus === 'pendente' || subscriptionStatus === 'no_subscription' || subscriptionStatus === 'error') {
+  // Redireciona se a assinatura não for ativa
+  if (subscriptionStatus !== 'ativo') {
     return <Navigate to="/subscription-selection" />;
   }
 

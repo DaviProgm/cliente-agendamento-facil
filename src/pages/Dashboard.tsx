@@ -23,6 +23,7 @@ import WeeklyReport from "@/components/DashboardCreditor/WeeklyReport";
 import ServicesPage from "@/components/DashboardCreditor/ServicesPage"; // Importa a nova página
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import Overview from "@/components/DashboardCreditor/Overview";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Notification {
   title: string;
@@ -214,7 +215,7 @@ const Dashboard: React.FC = () => {
     );
   }
   return (
-    <div className="flex h-screen text-light-text">
+    <div className="flex h-screen">
       <div className="hidden lg:block">
         <Sidebar
           onLogout={handleLogout}
@@ -254,6 +255,7 @@ const Dashboard: React.FC = () => {
               </h1>
             </div>
             <div className="flex items-center gap-4">
+              <ThemeToggle />
               <Popover onOpenChange={(open) => open && setHasNewNotification(false)}>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">
@@ -290,14 +292,14 @@ const Dashboard: React.FC = () => {
                       )}
                     </div>
                     {notifications.length > 0 && (
-                      <Button variant="outline" size="sm" onClick={() => setNotifications([])}>Limpar</Button>
+                      <Button size="sm" onClick={() => setNotifications([])}>Limpar</Button>
                     )}
                   </div>
                 </PopoverContent>
               </Popover>
 
               {permission === 'default' && (
-                <Button onClick={handleRequestPermission} size="sm" variant="outline">
+                <Button onClick={handleRequestPermission} size="sm">
                   <Bell className="w-4 h-4 mr-2" />
                   Ativar Notificações
                 </Button>
@@ -306,7 +308,7 @@ const Dashboard: React.FC = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-transparent p-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background p-6">
           <Outlet context={{ providerId, setIsClientModalOpen, setIsAppointmentModalOpen }} />
         </main>
       </div>
