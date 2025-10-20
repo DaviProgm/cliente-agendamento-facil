@@ -22,7 +22,7 @@ const Header = () => {
       </div>
 
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center gap-6">
+      <nav className="hidden md:flex items-center gap-6 text-white">
         <a href="#features" className="hover:underline">benefícios</a>
         <a href="#how-it-works" className="hover:underline">Como funciona</a>
         <a href="#testimonials" className="hover:underline">Clientes</a>

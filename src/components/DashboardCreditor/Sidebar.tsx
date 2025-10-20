@@ -57,10 +57,13 @@ const Sidebar = ({ onLogout, onToggleSidebar }: SidebarProps) => {
 
   return (
     <div className="bg-card w-64 h-dvh shadow-md border-r flex flex-col">
-      <div className="p-4 border-b flex items-center justify-between">
-        <h2 className="text-xl font-extrabold text-foreground tracking-tight">Workgate</h2>
+      <div className="h-24 p-4 border-b flex items-center justify-center relative">
+        <div className="flex items-center ">
+          <img src="/logo.png" alt="Workgate Logo" className="h-16 left-10" />
+          <h2 className="text-2xl font-extrabold text-foreground tracking-tight mr-10">Workgate</h2>
+        </div>
         <button
-          className="border px-2 py-1 rounded-md border-border lg:hidden"
+          className="border px-2 py-1 rounded-md border-border lg:hidden absolute right-4 top-1/2 -translate-y-1/2"
           onClick={onToggleSidebar}
         >
           <AlignJustify size={16} className="text-muted-foreground" />
