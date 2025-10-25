@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { updateUserProfile, getUserProfile, uploadProfilePhoto } from "@/services/userService";
+import { updateUserProfile, getUserProfile, uploadProfilePicture } from "@/services/userService";
 import { Copy, Loader2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,7 +72,7 @@ const ProfilePage = () => {
   });
 
   const uploadPhotoMutation = useMutation({
-    mutationFn: uploadProfilePhoto,
+    mutationFn: uploadProfilePicture,
     onSuccess: () => {
       toast.success("Foto de perfil atualizada!");
       queryClient.invalidateQueries({ queryKey: ['profile'] });

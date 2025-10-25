@@ -32,6 +32,9 @@ import Overview from "./components/DashboardCreditor/Overview";
 import ClientList from "./components/DashboardCreditor/ClientList";
 import AppointmentList from "./components/DashboardCreditor/AppointmentList";
 import ServicesPage from "./components/DashboardCreditor/ServicesPage";
+import UnitsPage from "./components/DashboardCreditor/UnitsPage";
+import ProfessionalsPage from "./components/DashboardCreditor/ProfessionalsPage";
+import ProfessionalsPublicPage from "./pages/ProfessionalsPublicPage";
 import Assinatura from "./pages/Assinatura";
 import CalendarPage from "./pages/CalendarPage";
 
@@ -85,6 +88,8 @@ const AppRoutes = () => {
           <Route path="subscription" element={<Assinatura />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="my-hours" element={<MyHoursPage />} />
+          <Route path="units" element={<UnitsPage />} />
+          <Route path="professionals" element={<ProfessionalsPage />} />
         </Route>
         <Route path="*" element={<NotFound />} />
         <Route path="/termos" element={<Terms />} />
@@ -95,6 +100,7 @@ const AppRoutes = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/sobre" element={<About />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/agendar" element={<ProfessionalsPublicPage />} />
         <Route path="/agendar/:username" element={<BookingPage />} />
       </Routes>
       <SupportBubbleWrapper />

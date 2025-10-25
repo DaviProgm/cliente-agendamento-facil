@@ -19,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			boxShadow: {
+				'glow': '0 0 8px 2px hsl(var(--primary))',
+			},
 			fontFamily: {
 				sans: ["Inter", ...fontFamily.sans],
 			},

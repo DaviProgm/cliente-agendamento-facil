@@ -1,59 +1,33 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, BarChart3, LogOut, AlignJustify, User, Wrench, Clock } from "lucide-react";
+import { Calendar, Users, BarChart3, LogOut, AlignJustify, User, Wrench, Clock, Building, Briefcase } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface SidebarProps {
   onLogout: () => void;
   onToggleSidebar?: () => void;
+  role?: string;
 }
 
-const Sidebar = ({ onLogout, onToggleSidebar }: SidebarProps) => {
+const Sidebar = ({ onLogout, onToggleSidebar, role }: SidebarProps) => {
   const location = useLocation();
 
   const menuItems = [
-    {
-      id: "overview",
-      label: "Visão Geral",
-      icon: BarChart3,
-      path: "/dashboard",
-    },
-    {
-      id: "clients",
-      label: "Clientes",
-      icon: Users,
-      path: "/dashboard/clients",
-    },
-    {
-      id: "appointments",
-      label: "Agendamentos",
-      icon: Calendar,
-      path: "/dashboard/appointments",
-    },
-    {
-      id: "services",
-      label: "Meus Serviços",
-      icon: Wrench,
-      path: "/dashboard/services",
-    },
-    {
-      id: "profile",
-      label: "Meu Perfil",
-      icon: User,
-      path: "/dashboard/profile",
-    },
-    {
-      id: "my-hours",
-      label: "Meus Horários",
-      icon: Clock,
-      path: "/dashboard/my-hours",
-    },
-    {
-      id: "subscription",
-      label: "Assinatura",
-      icon: User, // You might want to change this icon
-      path: "/dashboard/subscription",
-    },
+    { id: "overview", label: "Visão Geral", icon: BarChart3, path: "/dashboard" },
+    { id: "clients", label: "Clientes", icon: Users, path: "/dashboard/clients" },
+    { id: "appointments", label: "Agendamentos", icon: Calendar, path: "/dashboard/appointments" },
+    { id: "services", label: "Meus Serviços", icon: Wrench, path: "/dashboard/services" },
+    { id: "units", label: "Unidades", icon: Building, path: "/dashboard/units" },
+    { id: "professionals", label: "Profissionais", icon: Briefcase, path: "/dashboard/professionals" },
+    { id: "profile", label: "Meu Perfil", icon: User, path: "/dashboard/profile" },
+    { id: "my-hours", label: "Meus Horários", icon: Clock, path: "/dashboard/my-hours" },
+    { id: "subscription", label: "Assinatura", icon: User, path: "/dashboard/subscription" },
   ];
+
+  const providerMenuIds = new Set(['overview', 'appointments', 'profile', 'my-hours']);
+
+  const visibleMenuItems = role === 'provider'
+    ? menuItems.filter(item => providerMenuIds.has(item.id))
+    : menuItems;
 
   return (
     <div className="bg-card w-64 h-dvh shadow-md border-r flex flex-col">
@@ -71,7 +45,7 @@ const Sidebar = ({ onLogout, onToggleSidebar }: SidebarProps) => {
       </div>
 
       <nav className="flex-1 py-4">
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
           return (

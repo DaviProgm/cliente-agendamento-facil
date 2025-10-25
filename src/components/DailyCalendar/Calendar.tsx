@@ -108,7 +108,7 @@ export function DailyCalendar({
             className="absolute left-20 right-0 h-0.5 bg-primary z-10"
             style={{ top: `${((now.getHours() - startHour) * 60 + now.getMinutes()) / ((endHour - startHour) * 60) * 100}%` }}
           >
-            <div className="absolute -left-1 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_8px_2px_theme(colors.primary)]"></div>
+            <div className="absolute -left-1 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-primary shadow-glow"></div>
           </div>
         )}
 

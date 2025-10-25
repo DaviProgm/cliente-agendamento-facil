@@ -231,6 +231,7 @@ const Dashboard: React.FC = () => {
           />
           <div className="relative">
             <Sidebar
+              role={userData?.role} // Pass the user's role
               onLogout={handleLogout}
               onToggleSidebar={() => setIsSidebarOpen(false)}
             />

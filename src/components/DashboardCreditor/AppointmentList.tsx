@@ -177,8 +177,8 @@ const AppointmentList: React.FC = () => {
                 <CardHeader className="pb-4">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg font-semibold truncate">{appointment.client.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{appointment.service.name}</p>
+                      <CardTitle className="text-lg font-semibold truncate">{appointment.client?.name || 'Cliente não associado'}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{appointment.service?.name || 'Serviço não encontrado'}</p>
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
